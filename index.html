@@ -9,20 +9,64 @@
 </head>
 <body>
     <div id="page-bg" aria-hidden="true"></div>
-    <main id="dashboard">
+    <main id="dashboard"></main>
 
-    </main>
     <aside id="dockbar" class="dockbar" aria-label="Quick Dock">
-        <button class="dock-btn" id="dock-settings" title="Settings">
+        <button class="dock-btn" id="dock-settings" title="Settings" data-i18n-title="dockSettings">
             <i class="fa-solid fa-gear"></i>
         </button>
-        <button class="dock-btn" id="dock-theme" title="Theme">
-            <i class="fa-solid fa-palette"></i>
-        </button>
-        <button class="dock-btn" id="dock-account" title="Account">
+        <button class="dock-btn" id="dock-account" title="Account" data-i18n-title="dockAccount">
             <i class="fa-solid fa-user-large"></i>
         </button>
     </aside>
+
+    <dialog id="settings-modal" class="modal">
+        <div class="modal-header">
+            <h2 data-i18n="modalTitle">Settings</h2>
+            <button id="close-settings" class="close-btn" title="Close" data-i18n-title="closeBtn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <nav class="settings-sidebar" aria-label="Settings sections">
+                <button class="nav-tab active" data-tab="customization">
+                    <i class="fa-solid fa-palette"></i>
+                    <span data-i18n="tabCustomization">Customization</span>
+                </button>
+                <button class="nav-tab" data-tab="widgets">
+                    <i class="fa-solid fa-puzzle-piece"></i>
+                    <span data-i18n="tabWidgets">Widgets</span>
+                </button>
+                <button class="nav-tab" data-tab="general">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span data-i18n="tabGeneral">General</span>
+                </button>
+            </nav>
+            <div class="settings-content">
+                <section id="tab-customization" class="tab-pane active">
+                    <h3 data-i18n="tabCustomization">Customization</h3>
+                    <p class="tab-desc" data-i18n="customizationDesc">Background selection, blur level, and theme options...</p>
+                </section>
+                <section id="tab-widgets" class="tab-pane">
+                    <h3 data-i18n="tabWidgets">Widgets</h3>
+                    <p class="tab-desc" data-i18n="widgetsDesc">Clock settings, element ordering, and layout controls...</p>
+                </section>
+                <section id="tab-general" class="tab-pane">
+                    <div class="setting-item">
+                        <span class="setting-label" data-i18n="languageLabel">Language</span>
+                        <div class="select-wrapper">
+                            <select id="lang-select" class="custom-select" aria-label="Language">
+                                <option value="en">English</option>
+                                <option value="ru">Русский</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down select-icon"></i>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </dialog>
+
     <script src="script.js"></script>
 </body>
 </html>

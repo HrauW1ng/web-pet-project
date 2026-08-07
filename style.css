@@ -207,67 +207,350 @@ body {
   }
 }
 
-   .dockbar {
-    position: fixed;
-    top: 50%;
-    right: 1.25rem;
-    transform: translateY(-50%);
-    z-index: 50;
-    display: flex;
-    flex-direction: column;
-    gap: 0.625rem;
-    padding: 0.5rem;
-    background: rgb(110 112 118 / 0.42);
-    border: 1px solid rgb(255 255 255 / 0.14);
-    border-radius: 0.85rem;
-    box-shadow:
-      0 1px 2px rgb(0 0 0 / 12%),
-      0 12px 36px rgb(0 0 0 / 22%);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+.dockbar {
+  position: fixed;
+  top: 50%;
+  right: 1.25rem;
+  transform: translateY(-50%);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 0.5rem;
+  background: rgb(110 112 118 / 0.42);
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 0.85rem;
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 12%),
+    0 12px 36px rgb(0 0 0 / 22%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.dock-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  font-size: 1rem;
+  color: #ececef;
+  background: rgb(255 255 255 / 0.07);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.dock-btn:hover {
+  color: #ffffff;
+  background: rgb(255 255 255 / 0.18);
+  border-color: rgb(255 255 255 / 0.25);
+  transform: translateX(-3px);
+}
+
+.dock-btn:active {
+  transform: translateX(-1px) scale(0.96);
+}
+
+@media (max-width: 640px) {
+  .dockbar {
+    top: auto;
+    bottom: 1rem;
+    right: 50%;
+    transform: translateX(50%);
+    flex-direction: row;
   }
-  
-  .dock-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    padding: 0;
-    font-size: 1rem;
-    color: #ececef;
-    background: rgb(255 255 255 / 0.07);
-    border: 1px solid rgb(255 255 255 / 0.1);
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition:
-      transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
-      background 0.2s ease,
-      border-color 0.2s ease,
-      color 0.2s ease;
-  }
-  
+
   .dock-btn:hover {
-    color: #ffffff;
-    background: rgb(255 255 255 / 0.18);
-    border-color: rgb(255 255 255 / 0.25);
-    transform: translateX(-3px);
+    transform: translateY(-3px);
   }
-  
-  .dock-btn:active {
-    transform: translateX(-1px) scale(0.96);
+}
+
+/* --- Модальное окно настроек --- */
+#settings-modal {
+  width: 90%;
+  max-width: 38rem;
+  padding: 1.5rem;
+  color: #e8e9ec;
+  background: rgb(110 112 118 / 0.42);
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 1rem;
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 12%),
+    0 16px 48px rgb(0 0 0 / 22%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+#settings-modal::backdrop {
+  background: rgba(25, 26, 29, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgb(255 255 255 / 0.1);
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background: rgb(255 255 255 / 0.07);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 0.5rem;
+  color: #ececef;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.close-btn:hover {
+  background: rgb(255 255 255 / 0.18);
+  border-color: rgb(255 255 255 / 0.25);
+  color: #ffffff;
+}
+
+/* --- Структура сайдбара и контента --- */
+.modal-body {
+  display: flex;
+  gap: 1.25rem;
+  min-height: 16rem;
+}
+
+.settings-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 10.5rem;
+  padding-right: 0.85rem;
+  border-right: 1px solid rgb(255 255 255 / 0.1);
+  flex-shrink: 0;
+}
+
+.nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(232 233 236 / 0.7);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.nav-tab i {
+  width: 1.1rem;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.nav-tab:hover {
+  color: #ffffff;
+  background: rgb(255 255 255 / 0.08);
+}
+
+.nav-tab.active {
+  color: #ffffff;
+  background: rgb(255 255 255 / 0.14);
+  border-color: rgb(255 255 255 / 0.18);
+}
+
+.settings-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.tab-pane {
+  display: none;
+}
+
+.tab-pane.active {
+  display: block;
+}
+
+.tab-pane h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.tab-desc {
+  opacity: 0.7;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* --- Настройки и кастомный селект --- */
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+}
+
+.setting-item:first-child {
+  padding-top: 0;
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.setting-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #e8e9ec;
+}
+
+.select-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.custom-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 0.45rem 2.2rem 0.45rem 0.85rem;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #ececef;
+  background: rgb(255 255 255 / 0.08);
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  outline: none;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.custom-select:hover {
+  background: rgb(255 255 255 / 0.15);
+  border-color: rgb(255 255 255 / 0.25);
+}
+
+.custom-select:focus {
+  border-color: rgb(255 255 255 / 0.35);
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 0.1);
+}
+
+.custom-select option {
+  background: #3a3d44;
+  color: #e8e9ec;
+}
+
+.select-icon {
+  position: absolute;
+  right: 0.75rem;
+  font-size: 0.75rem;
+  color: rgb(232 233 236 / 0.7);
+  pointer-events: none;
+}
+
+@media (max-width: 540px) {
+  .modal-body {
+    flex-direction: column;
+    gap: 1rem;
   }
-  
-  @media (max-width: 640px) {
-    .dockbar {
-      top: auto;
-      bottom: 1rem;
-      right: 50%;
-      transform: translateX(50%);
-      flex-direction: row;
-    }
-  
-    .dock-btn:hover {
-      transform: translateY(-3px);
-    }
+
+  .settings-sidebar {
+    flex-direction: row;
+    width: 100%;
+    padding-right: 0;
+    padding-bottom: 0.75rem;
+    border-right: none;
+    border-bottom: 1px solid rgb(255 255 255 / 0.1);
+    overflow-x: auto;
   }
+
+  .nav-tab {
+    justify-content: center;
+    white-space: nowrap;
+  }
+}
+
+/* --- GPU-ускоренная анимация открытия и закрытия --- */
+#settings-modal[open] {
+  animation: modal-show 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+#settings-modal.is-closing {
+  animation: modal-hide 0.18s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+}
+
+#settings-modal[open]::backdrop {
+  animation: backdrop-show 0.2s ease forwards;
+}
+
+#settings-modal.is-closing::backdrop {
+  animation: backdrop-hide 0.18s ease forwards;
+}
+
+@keyframes modal-show {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modal-hide {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+}
+
+@keyframes backdrop-show {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes backdrop-hide {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
