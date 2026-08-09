@@ -44,13 +44,84 @@
             </nav>
             <div class="settings-content">
                 <section id="tab-customization" class="tab-pane active">
-                    <h3 data-i18n="tabCustomization">Customization</h3>
-                    <p class="tab-desc" data-i18n="customizationDesc">Background selection, blur level, and theme options...</p>
+                    <!-- Переключатель блюра UI элементов -->
+                    <div class="setting-item">
+                        <span class="setting-label" data-i18n="blurEnableLabel">UI Blur Effect</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="blur-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Регулятор интенсивности блюра UI -->
+                    <div id="blur-slider-wrapper" class="setting-item sub-setting">
+                        <div class="setting-label-group">
+                            <span class="setting-label" data-i18n="blurAmountLabel">UI Blur Intensity</span>
+                            <span id="blur-val-display" class="setting-value">10px</span>
+                        </div>
+                        <input type="range" id="blur-range" min="0" max="25" value="10" class="custom-range">
+                    </div>
+
+                    <!-- Выбор типа фона -->
+                    <div class="setting-item">
+                        <span class="setting-label" data-i18n="bgTypeLabel">Background</span>
+                        <div class="select-wrapper">
+                            <select id="bg-type-select" class="custom-select" aria-label="Background Type">
+                                <option value="gradient" data-i18n="bgTypeGradient">Gradient</option>
+                                <option value="color" data-i18n="bgTypeColor">Solid Color</option>
+                                <option value="image" data-i18n="bgTypeImage">Custom Image</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down select-icon"></i>
+                        </div>
+                    </div>
+
+                    <!-- Под-блок выбора 3 цветов градиента -->
+                    <div id="bg-gradient-wrapper" class="setting-item sub-setting is-hidden">
+                        <div class="setting-label-group">
+                            <span class="setting-label" data-i18n="bgGradientLabel">3-Color Gradient</span>
+                            <div class="color-picker-group">
+                                <input type="color" id="bg-grad-1" class="custom-color-picker" value="#6b7078">
+                                <input type="color" id="bg-grad-2" class="custom-color-picker" value="#52565e">
+                                <input type="color" id="bg-grad-3" class="custom-color-picker" value="#3a3d44">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Под-блок выбора монотонного цвета -->
+                    <div id="bg-color-wrapper" class="setting-item sub-setting is-hidden">
+                        <div class="setting-label-group">
+                            <span class="setting-label" data-i18n="bgColorLabel">Color</span>
+                            <input type="color" id="bg-color-picker" class="custom-color-picker" value="#3a3d44">
+                        </div>
+                    </div>
+
+                    <!-- Под-блок выбора файла изображения -->
+                    <div id="bg-image-wrapper" class="setting-item sub-setting is-hidden">
+                        <div class="setting-label-group">
+                            <span class="setting-label" data-i18n="bgImageLabel">Upload Image</span>
+                            <label class="custom-file-btn">
+                                <input type="file" id="bg-file-input" accept="image/*" hidden>
+                                <i class="fa-solid fa-folder-open"></i>
+                                <span id="bg-file-name" data-i18n="chooseFileBtn">Choose File</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Регулятор размытия фонового изображения -->
+                    <div id="bg-img-blur-wrapper" class="setting-item sub-setting is-hidden">
+                        <div class="setting-label-group">
+                            <span class="setting-label" data-i18n="bgImgBlurLabel">Image Blur</span>
+                            <span id="bg-img-blur-val" class="setting-value">8px</span>
+                        </div>
+                        <input type="range" id="bg-img-blur-range" min="0" max="40" value="8" class="custom-range">
+                    </div>
                 </section>
+
                 <section id="tab-widgets" class="tab-pane">
                     <h3 data-i18n="tabWidgets">Widgets</h3>
                     <p class="tab-desc" data-i18n="widgetsDesc">Clock settings, element ordering, and layout controls...</p>
                 </section>
+
                 <section id="tab-general" class="tab-pane">
                     <div class="setting-item">
                         <span class="setting-label" data-i18n="languageLabel">Language</span>
