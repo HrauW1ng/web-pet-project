@@ -1,6 +1,16 @@
+/* --- 1. CSS-переменные и базовый сброс --- */
 :root {
   --backdrop-blur: 10px;
   --bg-blur: 0px;
+  --bg-dark: #12141a;
+  --panel-bg: rgba(110, 112, 118, 0.42);
+  --panel-border: rgba(255, 255, 255, 0.14);
+  --panel-border-hover: rgba(255, 255, 255, 0.28);
+  --text-primary: #e8e9ec;
+  --text-secondary: rgba(232, 233, 236, 0.7);
+  --radius-lg: 1rem;
+  --radius-md: 0.5rem;
+  --radius-sm: 0.35rem;
 }
 
 *,
@@ -12,13 +22,13 @@
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  color: #e8e9ec;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text-primary);
   background: #3a3d44;
   overflow-x: hidden;
 }
 
-/* Фновый слой с аппаратным ускорением (GPU layer) */
+/* --- 2. Динамический фон --- */
 #page-bg {
   position: fixed;
   inset: -30px;
@@ -37,6 +47,7 @@ body {
   transform: translateZ(0);
 }
 
+/* --- 3. Главный карточный дашборд --- */
 #dashboard {
   display: flex;
   align-items: center;
@@ -49,20 +60,25 @@ body {
   width: 100%;
   max-width: 32rem;
   padding: 1.75rem 1.5rem;
-  background: rgb(110 112 118 / 0.42);
-  border: 1px solid rgb(255 255 255 / 0.14);
-  border-radius: 1rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
   box-shadow:
-    0 1px 2px rgb(0 0 0 / 12%),
-    0 16px 48px rgb(0 0 0 / 22%);
+    0 1px 2px rgba(0, 0, 0, 0.12),
+    0 16px 48px rgba(0, 0, 0, 0.22);
   backdrop-filter: blur(var(--backdrop-blur));
   -webkit-backdrop-filter: blur(var(--backdrop-blur));
   will-change: backdrop-filter;
   transform: translateZ(0);
 }
 
+/* Поисковая строка */
 .hero-search {
   margin-bottom: 1.25rem;
+}
+
+.hero-search.no-margin {
+  margin-bottom: 0;
 }
 
 .hero-search__input {
@@ -72,28 +88,30 @@ body {
   font: inherit;
   font-size: 1rem;
   color: inherit;
-  border: 1px solid rgb(255 255 255 / 0.12);
-  border-radius: 0.5rem;
-  background: rgb(255 255 255 / 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(var(--backdrop-blur));
   -webkit-backdrop-filter: blur(var(--backdrop-blur));
-  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
 .hero-search__input::placeholder {
-  color: rgb(232 233 236 / 0.55);
+  color: rgba(232, 233, 236, 0.55);
 }
 
 .hero-search__input:focus {
   outline: none;
-  border-color: rgb(255 255 255 / 0.28);
-  box-shadow: 0 0 0 3px rgb(255 255 255 / 0.08);
-  background: rgb(255 255 255 / 0.12);
+  border-color: var(--panel-border-hover);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.12);
 }
 
+/* --- Авто-позиционирование плиток (Flexbox Centering) --- */
 .quick-links {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 0.625rem;
 }
 
@@ -102,16 +120,19 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 1 1 120px;
+  max-width: 220px;
+  min-width: 110px;
   overflow: hidden;
-  padding: 0.75rem 0.5rem;
+  padding: 0.75rem 0.6rem;
   font-size: 0.875rem;
   font-weight: 500;
   text-decoration: none;
   color: #ececef;
-  background: rgb(255 255 255 / 0.07);
-  border: 1px solid rgb(255 255 255 / 0.1);
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 6px rgb(0 0 0 / 10%);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(var(--backdrop-blur));
   -webkit-backdrop-filter: blur(var(--backdrop-blur));
   transform: translateY(0);
@@ -131,8 +152,8 @@ body {
   border-radius: inherit;
   background: linear-gradient(
     155deg,
-    rgb(255 255 255 / 0.18) 0%,
-    rgb(255 255 255 / 0.04) 38%,
+    rgba(255, 255, 255, 0.18) 0%,
+    rgba(255, 255, 255, 0.04) 38%,
     transparent 55%
   );
   opacity: 0.45;
@@ -151,7 +172,7 @@ body {
   background: linear-gradient(
     90deg,
     transparent,
-    rgb(255 255 255 / 0.07),
+    rgba(255, 255, 255, 0.07),
     transparent
   );
   transform: skewX(-18deg);
@@ -161,11 +182,11 @@ body {
 
 .quick-link:hover {
   color: #f6f6f8;
-  background: rgb(255 255 255 / 0.15);
-  border-color: rgb(255 255 255 / 0.22);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--panel-border-hover);
   box-shadow:
-    0 10px 22px rgb(0 0 0 / 18%),
-    inset 0 1px 0 rgb(255 255 255 / 0.14);
+    0 10px 22px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
   transform: translateY(-3px);
 }
 
@@ -179,21 +200,19 @@ body {
 
 .quick-link:active {
   transform: translateY(-1px) scale(0.99);
-  box-shadow: 0 6px 14px rgb(0 0 0 / 16%);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.16);
   transition-duration: 0.12s;
 }
 
 .quick-link__label {
   position: relative;
   z-index: 1;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
-@media (min-width: 480px) {
-  .quick-links {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
+/* --- 4. Dockbar --- */
 .dockbar {
   position: fixed;
   top: 50%;
@@ -204,12 +223,12 @@ body {
   flex-direction: column;
   gap: 0.625rem;
   padding: 0.5rem;
-  background: rgb(110 112 118 / 0.42);
-  border: 1px solid rgb(255 255 255 / 0.14);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
   border-radius: 0.85rem;
   box-shadow:
-    0 1px 2px rgb(0 0 0 / 12%),
-    0 12px 36px rgb(0 0 0 / 22%);
+    0 1px 2px rgba(0, 0, 0, 0.12),
+    0 12px 36px rgba(0, 0, 0, 0.22);
   backdrop-filter: blur(var(--backdrop-blur));
   -webkit-backdrop-filter: blur(var(--backdrop-blur));
   will-change: backdrop-filter;
@@ -224,9 +243,9 @@ body {
   padding: 0;
   font-size: 1rem;
   color: #ececef;
-  background: rgb(255 255 255 / 0.07);
-  border: 1px solid rgb(255 255 255 / 0.1);
-  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
   backdrop-filter: blur(var(--backdrop-blur));
   -webkit-backdrop-filter: blur(var(--backdrop-blur));
   cursor: pointer;
@@ -239,8 +258,8 @@ body {
 
 .dock-btn:hover {
   color: #ffffff;
-  background: rgb(255 255 255 / 0.18);
-  border-color: rgb(255 255 255 / 0.25);
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.25);
   transform: translateX(-3px);
 }
 
@@ -262,18 +281,18 @@ body {
   }
 }
 
-/* --- Модальное окно настроек --- */
+/* --- 5. Модалка настроек --- */
 #settings-modal {
   width: 90%;
   max-width: 38rem;
   padding: 1.5rem;
-  color: #e8e9ec;
-  background: rgb(110 112 118 / 0.42);
-  border: 1px solid rgb(255 255 255 / 0.14);
-  border-radius: 1rem;
+  color: var(--text-primary);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
   box-shadow:
-    0 1px 2px rgb(0 0 0 / 12%),
-    0 16px 48px rgb(0 0 0 / 22%);
+    0 1px 2px rgba(0, 0, 0, 0.12),
+    0 16px 48px rgba(0, 0, 0, 0.22);
   backdrop-filter: blur(var(--backdrop-blur));
   -webkit-backdrop-filter: blur(var(--backdrop-blur));
   will-change: backdrop-filter;
@@ -291,7 +310,7 @@ body {
   align-items: center;
   margin-bottom: 1.25rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgb(255 255 255 / 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .modal-header h2 {
@@ -306,9 +325,9 @@ body {
   justify-content: center;
   width: 2rem;
   height: 2rem;
-  background: rgb(255 255 255 / 0.07);
-  border: 1px solid rgb(255 255 255 / 0.1);
-  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
   color: #ececef;
   font-size: 1rem;
   cursor: pointer;
@@ -316,16 +335,15 @@ body {
 }
 
 .close-btn:hover {
-  background: rgb(255 255 255 / 0.18);
-  border-color: rgb(255 255 255 / 0.25);
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.25);
   color: #ffffff;
 }
 
-/* --- Структура сайдбара и контента --- */
 .modal-body {
   display: flex;
   gap: 1.25rem;
-  min-height: 16rem;
+  min-height: 18rem;
 }
 
 .settings-sidebar {
@@ -334,7 +352,7 @@ body {
   gap: 0.35rem;
   width: 10.5rem;
   padding-right: 0.85rem;
-  border-right: 1px solid rgb(255 255 255 / 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
   flex-shrink: 0;
 }
 
@@ -347,10 +365,10 @@ body {
   font: inherit;
   font-size: 0.875rem;
   font-weight: 500;
-  color: rgb(232 233 236 / 0.7);
+  color: var(--text-secondary);
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   cursor: pointer;
   text-align: left;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
@@ -364,13 +382,13 @@ body {
 
 .nav-tab:hover {
   color: #ffffff;
-  background: rgb(255 255 255 / 0.08);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .nav-tab.active {
   color: #ffffff;
-  background: rgb(255 255 255 / 0.14);
-  border-color: rgb(255 255 255 / 0.18);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
 .settings-content {
@@ -387,24 +405,25 @@ body {
 }
 
 .tab-pane h3 {
-  margin: 0 0 0.75rem 0;
+  margin: 0 0 0.25rem 0;
   font-size: 1.05rem;
   font-weight: 500;
 }
 
 .tab-desc {
   opacity: 0.7;
-  font-size: 0.9rem;
-  margin: 0;
+  font-size: 0.825rem;
+  margin: 0 0 1rem 0;
+  line-height: 1.4;
 }
 
-/* --- Элементы настроек --- */
+/* --- 6. Элементы управления --- */
 .setting-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 0;
-  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .setting-item:first-child {
@@ -418,10 +437,9 @@ body {
 .setting-label {
   font-size: 0.95rem;
   font-weight: 500;
-  color: #e8e9ec;
+  color: var(--text-primary);
 }
 
-/* --- Переключатель (Toggle Switch) --- */
 .toggle-switch {
   position: relative;
   display: inline-block;
@@ -439,8 +457,8 @@ body {
   position: absolute;
   cursor: pointer;
   inset: 0;
-  background-color: rgb(255 255 255 / 0.12);
-  border: 1px solid rgb(255 255 255 / 0.18);
+  background-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 1rem;
   transition: background-color 0.25s ease, border-color 0.25s ease;
 }
@@ -458,8 +476,8 @@ body {
 }
 
 .toggle-switch input:checked + .toggle-slider {
-  background-color: rgb(255 255 255 / 0.28);
-  border-color: rgb(255 255 255 / 0.4);
+  background-color: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .toggle-switch input:checked + .toggle-slider::before {
@@ -467,21 +485,21 @@ body {
   background-color: #ffffff;
 }
 
-/* --- Выплывающие sub-setting блоки --- */
 .sub-setting {
   flex-direction: column;
   align-items: stretch;
   gap: 0.5rem;
   overflow: hidden;
-  max-height: 5rem;
+  max-height: 6rem;
   opacity: 1;
   filter: blur(0px);
   transform: translateY(0);
-  transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-              opacity 0.3s ease,
-              filter 0.3s ease,
-              transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-              padding 0.35s ease;
+  transition:
+    max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.3s ease,
+    filter 0.3s ease,
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    padding 0.35s ease;
 }
 
 .sub-setting.is-hidden {
@@ -503,20 +521,18 @@ body {
 
 .setting-value {
   font-size: 0.85rem;
-  color: rgb(232 233 236 / 0.7);
+  color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
 }
 
-/* --- Range Input --- */
 .custom-range {
   appearance: none;
   -webkit-appearance: none;
   width: 100%;
   height: 0.4rem;
   border-radius: 0.2rem;
-  background: rgb(255 255 255 / 0.15);
+  background: rgba(255, 255, 255, 0.15);
   outline: none;
-  transition: background 0.2s ease;
 }
 
 .custom-range::-webkit-slider-thumb {
@@ -535,22 +551,6 @@ body {
   transform: scale(1.18);
 }
 
-.custom-range::-moz-range-thumb {
-  width: 1rem;
-  height: 1rem;
-  border: none;
-  border-radius: 50%;
-  background: #ffffff;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  transition: transform 0.15s ease;
-}
-
-.custom-range::-moz-range-thumb:hover {
-  transform: scale(1.18);
-}
-
-/* --- Селекты --- */
 .select-wrapper {
   position: relative;
   display: inline-flex;
@@ -560,44 +560,37 @@ body {
 .custom-select {
   appearance: none;
   -webkit-appearance: none;
-  -moz-appearance: none;
   padding: 0.45rem 2.2rem 0.45rem 0.85rem;
   font: inherit;
   font-size: 0.875rem;
   font-weight: 500;
   color: #ececef;
-  background: rgb(255 255 255 / 0.08);
-  border: 1px solid rgb(255 255 255 / 0.14);
-  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-md);
   cursor: pointer;
   outline: none;
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .custom-select:hover {
-  background: rgb(255 255 255 / 0.15);
-  border-color: rgb(255 255 255 / 0.25);
-}
-
-.custom-select:focus {
-  border-color: rgb(255 255 255 / 0.35);
-  box-shadow: 0 0 0 2px rgb(255 255 255 / 0.1);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
 .custom-select option {
   background: #3a3d44;
-  color: #e8e9ec;
+  color: var(--text-primary);
 }
 
 .select-icon {
   position: absolute;
   right: 0.75rem;
   font-size: 0.75rem;
-  color: rgb(232 233 236 / 0.7);
+  color: var(--text-secondary);
   pointer-events: none;
 }
 
-/* --- Выбор цвета и загрузка файла --- */
 .color-picker-group {
   display: flex;
   align-items: center;
@@ -607,14 +600,13 @@ body {
 .custom-color-picker {
   appearance: none;
   -webkit-appearance: none;
-  border: 1px solid rgb(255 255 255 / 0.18);
-  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-md);
   width: 2.2rem;
   height: 2.2rem;
   padding: 0.15rem;
-  background: rgb(255 255 255 / 0.08);
+  background: rgba(255, 255, 255, 0.08);
   cursor: pointer;
-  transition: border-color 0.2s ease, transform 0.15s ease;
 }
 
 .custom-color-picker::-webkit-color-swatch-wrapper {
@@ -623,17 +615,7 @@ body {
 
 .custom-color-picker::-webkit-color-swatch {
   border: none;
-  border-radius: 0.35rem;
-}
-
-.custom-color-picker::-moz-color-swatch {
-  border: none;
-  border-radius: 0.35rem;
-}
-
-.custom-color-picker:hover {
-  border-color: rgb(255 255 255 / 0.35);
-  transform: scale(1.05);
+  border-radius: var(--radius-sm);
 }
 
 .custom-file-btn {
@@ -644,19 +626,163 @@ body {
   font-size: 0.875rem;
   font-weight: 500;
   color: #ececef;
-  background: rgb(255 255 255 / 0.08);
-  border: 1px solid rgb(255 255 255 / 0.14);
-  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+/* --- 7. Вкладка Widgets & Управление Плитками --- */
+.widgets-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.links-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.tile-setting-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.75rem;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.tile-setting-btn span {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.tile-setting-btn i {
+  font-size: 0.75rem;
+  opacity: 0.5;
+  margin-left: 0.35rem;
+}
+
+.tile-setting-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--panel-border-hover);
+  transform: translateY(-1px);
+}
+
+.tile-setting-btn.active {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12);
+}
+
+/* Форма плитки */
+.tile-edit-card-form {
+  padding: 0.85rem 1rem;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  margin-top: 0.75rem;
+}
+
+.tile-edit-card-form.is-hidden {
+  display: none;
+}
+
+.tile-edit-card-form h4 {
+  margin: 0 0 0.65rem 0;
+  font-size: 0.925rem;
+  font-weight: 500;
+}
+
+.custom-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.custom-input:focus {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: var(--panel-border-hover);
+}
+
+.edit-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-.custom-file-btn:hover {
-  background: rgb(255 255 255 / 0.15);
-  border-color: rgb(255 255 255 / 0.25);
+.btn-add {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.btn-primary {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-primary:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+}
+
+.btn-danger {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  margin-right: auto;
+}
+
+.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.35);
   color: #ffffff;
 }
 
+/* --- 8. Адаптивность и Анимации --- */
 @media (max-width: 540px) {
   .modal-body {
     flex-direction: column;
@@ -669,7 +795,7 @@ body {
     padding-right: 0;
     padding-bottom: 0.75rem;
     border-right: none;
-    border-bottom: 1px solid rgb(255 255 255 / 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     overflow-x: auto;
   }
 
@@ -679,7 +805,6 @@ body {
   }
 }
 
-/* --- Анимации --- */
 #settings-modal[open] {
   animation: modal-show 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -697,40 +822,21 @@ body {
 }
 
 @keyframes modal-show {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 @keyframes modal-hide {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.96) translateY(6px);
-  }
+  from { opacity: 1; }
+  to { opacity: 0; transform: scale(0.96) translateY(6px); }
 }
 
 @keyframes backdrop-show {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes backdrop-hide {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
+  from { opacity: 1; }
+  to { opacity: 0; }
 }

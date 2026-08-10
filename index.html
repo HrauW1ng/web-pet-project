@@ -118,8 +118,39 @@
                 </section>
 
                 <section id="tab-widgets" class="tab-pane">
-                    <h3 data-i18n="tabWidgets">Widgets</h3>
-                    <p class="tab-desc" data-i18n="widgetsDesc">Clock settings, element ordering, and layout controls...</p>
+                    <div class="widgets-section">
+                        <div class="widgets-section-header">
+                            <div>
+                                <h3 data-i18n="quickLinksTitle">Quick Links</h3>
+                                <p class="tab-desc" data-i18n="quickLinksDesc">Add and edit tiles shown under the search bar.</p>
+                            </div>
+                            <button type="button" id="add-tile-btn" class="btn btn-primary btn-add">
+                                <i class="fa-solid fa-plus"></i>
+                                <span data-i18n="addTileBtn">Add Link</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Сетка текущих плиток -->
+                        <div id="links-settings-grid" class="links-settings-grid"></div>
+                
+                        <!-- Форма создания/редактирования плитки -->
+                        <div id="tile-edit-form" class="tile-edit-card-form is-hidden">
+                            <h4 id="tile-form-title" data-i18n="editTileTitle">Edit Tile</h4>
+                            <div class="setting-item sub-setting">
+                                <span class="setting-label" data-i18n="tileNameLabel">Title</span>
+                                <input type="text" id="tile-name-input" class="custom-input" placeholder="e.g. YouTube" data-i18n-placeholder="tileNamePlaceholder">
+                            </div>
+                            <div class="setting-item sub-setting">
+                                <span class="setting-label" data-i18n="tileUrlLabel">URL</span>
+                                <input type="url" id="tile-url-input" class="custom-input" placeholder="https://youtube.com">
+                            </div>
+                            <div class="edit-form-actions">
+                                <button type="button" id="tile-delete-btn" class="btn btn-danger is-hidden" data-i18n="deleteBtn">Delete</button>
+                                <button type="button" id="tile-cancel-btn" class="btn btn-secondary" data-i18n="cancelBtn">Cancel</button>
+                                <button type="button" id="tile-save-btn" class="btn btn-primary" data-i18n="saveBtn">Save</button>
+                            </div>
+                        </div>
+                    </div>
                 </section>
 
                 <section id="tab-general" class="tab-pane">

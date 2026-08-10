@@ -1,4 +1,7 @@
-const CONFIG_KEY = "dashboardConfig-v2";
+const CONFIG_KEY = "dashboardConfig-v3";
+const IDB_NAME = "DashboardDB";
+const IDB_STORE = "assets";
+const IDB_KEY_BG = "customBgImage";
 
 const defaultConfig = {
   lang: "en",
@@ -17,19 +20,7 @@ const defaultConfig = {
     placeholder: "Search the web…",
     urlTemplate: "https://www.google.com/search?q={query}",
   },
-  links: [
-    { label: "SoundCloud", url: "https://soundcloud.com" },
-    { label: "FunPay", url: "https://funpay.com" },
-    { label: "YouTube", url: "https://youtube.com" },
-    { label: "GitHub", url: "https://github.com" },
-    { label: "Gmail", url: "https://mail.google.com" },
-    { label: "Gemini", url: "https://gemini.google.com" },
-    { label: "Roblox", url: "https://www.roblox.com" },
-    {
-      label: "Osu Maps",
-      url: "https://osu.ppy.sh/beatmapsets?m=0&nsfw=true",
-    },
-  ],
+  links: [],
 };
 
 const TRANSLATIONS = {
@@ -53,9 +44,20 @@ const TRANSLATIONS = {
     bgImgBlurLabel: "Background Image Blur",
     chooseFileBtn: "Choose File",
     customizationDesc: "Background selection, blur level, and theme options...",
-    widgetsDesc: "Clock settings, element ordering, and layout controls...",
+    widgetsDesc: "Add and manage quick links under search bar.",
     languageLabel: "Language",
     searchPlaceholder: "Search the web…",
+    quickLinksTitle: "Quick Links",
+    quickLinksDesc: "Add and edit tiles shown under the search bar.",
+    addTileBtn: "Add Link",
+    addTileTitle: "New Tile",
+    editTileTitle: "Edit Tile",
+    tileNameLabel: "Title",
+    tileNamePlaceholder: "e.g. YouTube",
+    tileUrlLabel: "URL",
+    cancelBtn: "Cancel",
+    saveBtn: "Save",
+    deleteBtn: "Delete",
   },
   ru: {
     modalTitle: "Настройки",
@@ -77,16 +79,92 @@ const TRANSLATIONS = {
     bgImgBlurLabel: "Размытие фонового фото",
     chooseFileBtn: "Выбрать файл",
     customizationDesc: "Выбор фона, настройка размытия и визуальные темы...",
-    widgetsDesc: "Управление часами, порядок элементов и виджеты...",
+    widgetsDesc: "Управление быстрым доступом и ссылками-плитками.",
     languageLabel: "Язык",
     searchPlaceholder: "Поиск в сети…",
+    quickLinksTitle: "Быстрые ссылки",
+    quickLinksDesc: "Добавляйте и редактируйте плитки под поисковой строкой.",
+    addTileBtn: "Добавить",
+    addTileTitle: "Новая плитка",
+    editTileTitle: "Редактирование плитки",
+    tileNameLabel: "Название",
+    tileNamePlaceholder: "Например: YouTube",
+    tileUrlLabel: "URL ссылка",
+    cancelBtn: "Отмена",
+    saveBtn: "Сохранить",
+    deleteBtn: "Удалить",
   },
 };
 
-let currentConfig = loadConfig();
+let currentConfig = structuredClone(defaultConfig);
+let selectedTileIndex = null;
 let rafId = null;
 
-// Оптимизированное обновление CSS-переменных без лагов
+// --- Helper IndexedDB для надежного хранения тяжелых картинок ---
+function openIDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(IDB_NAME, 1);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function saveImageToIDB(dataUrl) {
+  try {
+    const db = await openIDB();
+    const tx = db.transaction(IDB_STORE, "readwrite");
+    const store = tx.objectStore(IDB_STORE);
+    store.put(dataUrl, IDB_KEY_BG);
+    return new Promise((resolve) => {
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    });
+  } catch (e) {
+    console.error("IndexedDB Error:", e);
+    return false;
+  }
+}
+
+async function loadImageFromIDB() {
+  try {
+    const db = await openIDB();
+    const tx = db.transaction(IDB_STORE, "readonly");
+    const store = tx.objectStore(IDB_STORE);
+    const req = store.get(IDB_KEY_BG);
+    return new Promise((resolve) => {
+      req.onsuccess = () => resolve(req.result || "");
+      req.onerror = () => resolve("");
+    });
+  } catch {
+    return "";
+  }
+}
+
+// --- Вспомогательные функции глубокого слияния объектов ---
+function isObject(item) {
+  return item && typeof item === "object" && !Array.isArray(item);
+}
+
+function deepMerge(target, source) {
+  const output = { ...target };
+  if (isObject(target) && isObject(source)) {
+    Object.keys(source).forEach((key) => {
+      if (isObject(source[key]) && key in target) {
+        output[key] = deepMerge(target[key], source[key]);
+      } else {
+        output[key] = source[key];
+      }
+    });
+  }
+  return output;
+}
+
 function setCSSVar(name, value) {
   if (rafId) cancelAnimationFrame(rafId);
   rafId = requestAnimationFrame(() => {
@@ -97,18 +175,25 @@ function setCSSVar(name, value) {
 function loadConfig() {
   try {
     const saved = localStorage.getItem(CONFIG_KEY);
-    if (saved) return { ...defaultConfig, ...JSON.parse(saved) };
-  } catch {
-    /* ignore invalid saved config */
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return deepMerge(defaultConfig, parsed);
+    }
+  } catch (e) {
+    console.error("Config load error:", e);
   }
   return structuredClone(defaultConfig);
 }
 
 function saveConfig() {
   try {
-    localStorage.setItem(CONFIG_KEY, JSON.stringify(currentConfig));
-  } catch {
-    /* ignore save errors */
+    const configToSave = structuredClone(currentConfig);
+    if (configToSave.bg) {
+      delete configToSave.bg.image;
+    }
+    localStorage.setItem(CONFIG_KEY, JSON.stringify(configToSave));
+  } catch (e) {
+    console.error("Save config error:", e);
   }
 }
 
@@ -190,18 +275,10 @@ function applyBgSettings() {
     }
   }
 
-  if (gradWrapper) {
-    bg.type === "gradient" ? gradWrapper.classList.remove("is-hidden") : gradWrapper.classList.add("is-hidden");
-  }
-  if (colorWrapper) {
-    bg.type === "color" ? colorWrapper.classList.remove("is-hidden") : colorWrapper.classList.add("is-hidden");
-  }
-  if (imageWrapper) {
-    bg.type === "image" ? imageWrapper.classList.remove("is-hidden") : imageWrapper.classList.add("is-hidden");
-  }
-  if (imgBlurWrapper) {
-    bg.type === "image" ? imgBlurWrapper.classList.remove("is-hidden") : imgBlurWrapper.classList.add("is-hidden");
-  }
+  if (gradWrapper) bg.type === "gradient" ? gradWrapper.classList.remove("is-hidden") : gradWrapper.classList.add("is-hidden");
+  if (colorWrapper) bg.type === "color" ? colorWrapper.classList.remove("is-hidden") : colorWrapper.classList.add("is-hidden");
+  if (imageWrapper) bg.type === "image" ? imageWrapper.classList.remove("is-hidden") : imageWrapper.classList.add("is-hidden");
+  if (imgBlurWrapper) bg.type === "image" ? imgBlurWrapper.classList.remove("is-hidden") : imgBlurWrapper.classList.add("is-hidden");
 }
 
 function updateLanguage(lang) {
@@ -220,7 +297,14 @@ function updateLanguage(lang) {
     if (dict[key]) el.title = dict[key];
   });
 
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+    const key = el.dataset.i18nPlaceholder;
+    if (dict[key]) el.placeholder = dict[key];
+  });
+
+  if (!currentConfig.search) currentConfig.search = { ...defaultConfig.search };
   currentConfig.search.placeholder = dict.searchPlaceholder;
+
   const dashboard = document.getElementById("dashboard");
   if (dashboard) renderHeroCard(dashboard, currentConfig);
 
@@ -255,36 +339,127 @@ function renderHeroCard(container, config) {
     window.location.href = url;
   });
 
-  const linksNav = document.createElement("nav");
-  linksNav.className = "quick-links";
-  linksNav.setAttribute("aria-label", "Quick links");
+  card.append(form);
 
-  for (const link of config.links) {
-    const a = document.createElement("a");
-    a.className = "quick-link";
-    a.href = link.url;
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    const label = document.createElement("span");
-    label.className = "quick-link__label";
-    label.textContent = link.label;
-    a.append(label);
-    linksNav.append(a);
+  if (config.links && config.links.length > 0) {
+    const linksNav = document.createElement("nav");
+    linksNav.className = "quick-links";
+    linksNav.setAttribute("aria-label", "Quick links");
+
+    for (const link of config.links) {
+      const a = document.createElement("a");
+      a.className = "quick-link";
+      a.href = link.url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+
+      const label = document.createElement("span");
+      label.className = "quick-link__label";
+      label.textContent = link.label;
+
+      a.append(label);
+      linksNav.append(a);
+    }
+    card.append(linksNav);
+  } else {
+    form.classList.add("no-margin");
   }
 
-  card.append(form, linksNav);
   container.append(card);
 }
 
-// --- Инициализация ---
-const dashboard = document.getElementById("dashboard");
-if (dashboard) renderHeroCard(dashboard, currentConfig);
+function renderLinksSettingsGrid() {
+  const grid = document.getElementById("links-settings-grid");
+  if (!grid) return;
 
-updateLanguage(currentConfig.lang || "en");
-applyBlurSettings();
-applyBgSettings();
+  grid.innerHTML = "";
 
-// --- Оптимизированные события UI блюра ---
+  currentConfig.links.forEach((link, index) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = `tile-setting-btn ${selectedTileIndex === index ? "active" : ""}`;
+
+    const span = document.createElement("span");
+    span.textContent = link.label;
+
+    const icon = document.createElement("i");
+    icon.className = "fa-solid fa-pen";
+
+    btn.append(span, icon);
+
+    btn.addEventListener("click", () => {
+      openTileForm(index);
+    });
+
+    grid.append(btn);
+  });
+}
+
+function openTileForm(mode) {
+  selectedTileIndex = mode;
+  renderLinksSettingsGrid();
+
+  const form = document.getElementById("tile-edit-form");
+  const formTitle = document.getElementById("tile-form-title");
+  const nameInput = document.getElementById("tile-name-input");
+  const urlInput = document.getElementById("tile-url-input");
+  const deleteBtn = document.getElementById("tile-delete-btn");
+
+  if (form && nameInput && urlInput) {
+    const dict = TRANSLATIONS[currentConfig.lang] || TRANSLATIONS.en;
+
+    if (mode === "new") {
+      nameInput.value = "";
+      urlInput.value = "";
+      if (formTitle) formTitle.textContent = dict.addTileTitle || "New Tile";
+      if (deleteBtn) deleteBtn.classList.add("is-hidden");
+    } else {
+      const link = currentConfig.links[mode];
+      nameInput.value = link.label;
+      urlInput.value = link.url;
+      if (formTitle) formTitle.textContent = dict.editTileTitle || "Edit Tile";
+      if (deleteBtn) deleteBtn.classList.remove("is-hidden");
+    }
+
+    form.classList.remove("is-hidden");
+    nameInput.focus();
+  }
+}
+
+function closeTileEditForm() {
+  selectedTileIndex = null;
+  const form = document.getElementById("tile-edit-form");
+  const nameInput = document.getElementById("tile-name-input");
+  const urlInput = document.getElementById("tile-url-input");
+
+  if (nameInput) nameInput.value = "";
+  if (urlInput) urlInput.value = "";
+  if (form) form.classList.add("is-hidden");
+
+  renderLinksSettingsGrid();
+}
+
+// --- Асинхронная инициализация приложения ---
+async function initApp() {
+  currentConfig = loadConfig();
+
+  const savedBgImage = await loadImageFromIDB();
+  if (savedBgImage) {
+    currentConfig.bg.image = savedBgImage;
+  }
+
+  const dashboard = document.getElementById("dashboard");
+  if (dashboard) renderHeroCard(dashboard, currentConfig);
+
+  updateLanguage(currentConfig.lang || "en");
+  applyBlurSettings();
+  applyBgSettings();
+  renderLinksSettingsGrid();
+}
+
+initApp();
+
+// --- События UI блюра ---
 const blurToggle = document.getElementById("blur-toggle");
 if (blurToggle) {
   blurToggle.addEventListener("change", (e) => {
@@ -297,7 +472,6 @@ if (blurToggle) {
 
 const blurRange = document.getElementById("blur-range");
 if (blurRange) {
-  // Быстрое обновление стилей без сохранения
   blurRange.addEventListener("input", (e) => {
     const val = parseInt(e.target.value, 10);
     const display = document.getElementById("blur-val-display");
@@ -305,7 +479,6 @@ if (blurRange) {
     setCSSVar("--backdrop-blur", `${val}px`);
   });
 
-  // Сохранение в конфиг только по завершению перемещения
   blurRange.addEventListener("change", (e) => {
     if (!currentConfig.blur) currentConfig.blur = { ...defaultConfig.blur };
     currentConfig.blur.amount = parseInt(e.target.value, 10);
@@ -313,7 +486,7 @@ if (blurRange) {
   });
 }
 
-// --- Оптимизированные события фона ---
+// --- События фона ---
 const bgTypeSelect = document.getElementById("bg-type-select");
 if (bgTypeSelect) {
   bgTypeSelect.addEventListener("change", (e) => {
@@ -324,7 +497,6 @@ if (bgTypeSelect) {
   });
 }
 
-// Выбор цвета градиента
 const gradPickers = [
   document.getElementById("bg-grad-1"),
   document.getElementById("bg-grad-2"),
@@ -335,9 +507,9 @@ gradPickers.forEach((picker, index) => {
   if (!picker) return;
 
   picker.addEventListener("input", () => {
-    const c1 = gradPickers[0].value;
-    const c2 = gradPickers[1].value;
-    const c3 = gradPickers[2].value;
+    const c1 = gradPickers[0] ? gradPickers[0].value : "#6b7078";
+    const c2 = gradPickers[1] ? gradPickers[1].value : "#52565e";
+    const c3 = gradPickers[2] ? gradPickers[2].value : "#3a3d44";
     const pageBg = document.getElementById("page-bg");
     if (pageBg) {
       pageBg.style.backgroundImage = `linear-gradient(145deg, ${c1} 0%, ${c2} 50%, ${c3} 100%)`;
@@ -352,7 +524,6 @@ gradPickers.forEach((picker, index) => {
   });
 });
 
-// Монотонный цвет
 const bgColorPicker = document.getElementById("bg-color-picker");
 if (bgColorPicker) {
   bgColorPicker.addEventListener("input", (e) => {
@@ -367,17 +538,23 @@ if (bgColorPicker) {
   });
 }
 
-// Загрузка кастомного изображения
 const bgFileInput = document.getElementById("bg-file-input");
 if (bgFileInput) {
   bgFileInput.addEventListener("change", (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    const fileNameSpan = document.getElementById("bg-file-name");
+    if (fileNameSpan) fileNameSpan.textContent = file.name;
+
     const reader = new FileReader();
-    reader.onload = (evt) => {
+    reader.onload = async (evt) => {
+      const imageData = evt.target.result;
       if (!currentConfig.bg) currentConfig.bg = { ...defaultConfig.bg };
-      currentConfig.bg.image = evt.target.result;
+
+      await saveImageToIDB(imageData);
+      currentConfig.bg.image = imageData;
+
       saveConfig();
       applyBgSettings();
     };
@@ -385,7 +562,6 @@ if (bgFileInput) {
   });
 }
 
-// Оптимизированный ползунок блюра фонового фото
 const bgImgBlurRange = document.getElementById("bg-img-blur-range");
 if (bgImgBlurRange) {
   bgImgBlurRange.addEventListener("input", (e) => {
@@ -402,7 +578,67 @@ if (bgImgBlurRange) {
   });
 }
 
-// --- Управление Dockbar и модальным окном ---
+// --- Кнопка "Добавить ссылку" ---
+const addTileBtn = document.getElementById("add-tile-btn");
+if (addTileBtn) {
+  addTileBtn.addEventListener("click", () => {
+    openTileForm("new");
+  });
+}
+
+// --- Обработчики формы плиток ---
+const tileSaveBtn = document.getElementById("tile-save-btn");
+if (tileSaveBtn) {
+  tileSaveBtn.addEventListener("click", () => {
+    if (selectedTileIndex === null) return;
+    const nameInput = document.getElementById("tile-name-input");
+    const urlInput = document.getElementById("tile-url-input");
+
+    if (nameInput && urlInput) {
+      const label = nameInput.value.trim();
+      let url = urlInput.value.trim();
+
+      if (label && url) {
+        if (!/^https?:\/\//i.test(url)) {
+          url = "https://" + url;
+        }
+
+        if (selectedTileIndex === "new") {
+          currentConfig.links.push({ label, url });
+        } else {
+          currentConfig.links[selectedTileIndex] = { label, url };
+        }
+
+        saveConfig();
+        const dashboard = document.getElementById("dashboard");
+        if (dashboard) renderHeroCard(dashboard, currentConfig);
+        closeTileEditForm();
+      }
+    }
+  });
+}
+
+const tileDeleteBtn = document.getElementById("tile-delete-btn");
+if (tileDeleteBtn) {
+  tileDeleteBtn.addEventListener("click", () => {
+    if (typeof selectedTileIndex === "number" && selectedTileIndex >= 0) {
+      currentConfig.links.splice(selectedTileIndex, 1);
+      saveConfig();
+      const dashboard = document.getElementById("dashboard");
+      if (dashboard) renderHeroCard(dashboard, currentConfig);
+      closeTileEditForm();
+    }
+  });
+}
+
+const tileCancelBtn = document.getElementById("tile-cancel-btn");
+if (tileCancelBtn) {
+  tileCancelBtn.addEventListener("click", () => {
+    closeTileEditForm();
+  });
+}
+
+// --- Dockbar и Модалка ---
 const dockbar = document.getElementById("dockbar");
 const settingsModal = document.getElementById("settings-modal");
 const closeSettingsBtn = document.getElementById("close-settings");
@@ -410,6 +646,7 @@ const closeSettingsBtn = document.getElementById("close-settings");
 function closeSettingsModal() {
   if (!settingsModal || !settingsModal.open || settingsModal.classList.contains("is-closing")) return;
 
+  closeTileEditForm();
   settingsModal.classList.add("is-closing");
 
   const handleAnimationEnd = (e) => {
@@ -459,18 +696,6 @@ if (settingsModal) {
       if (activePane) activePane.classList.add("active");
     });
   }
-
-  settingsModal.addEventListener("click", (e) => {
-    const rect = settingsModal.getBoundingClientRect();
-    if (
-      e.clientX < rect.left ||
-      e.clientX > rect.right ||
-      e.clientY < rect.top ||
-      e.clientY > rect.bottom
-    ) {
-      closeSettingsModal();
-    }
-  });
 
   settingsModal.addEventListener("cancel", (e) => {
     e.preventDefault();
