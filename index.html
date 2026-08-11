@@ -44,6 +44,35 @@
             </nav>
             <div class="settings-content">
                 <section id="tab-customization" class="tab-pane active">
+                    <!-- Выбор цветовой палитры -->
+                    <div class="setting-item">
+                        <span class="setting-label" data-i18n="paletteLabel">Color Palette</span>
+                        <div class="select-wrapper">
+                            <select id="palette-select" class="custom-select" aria-label="Color Palette">
+                                <option value="default" data-i18n="paletteDefault">Default Glass</option>
+                                <option value="mocha" data-i18n="paletteMocha">Catppuccin Mocha</option>
+                                <option value="latte" data-i18n="paletteLatte">Catppuccin Latte</option>
+                                <option value="nord" data-i18n="paletteNord">Nordic Frost</option>
+                                <option value="sakura" data-i18n="paletteSakura">Sakura Pink</option>
+                                <option value="oled" data-i18n="paletteOled">OLED Pitch Dark</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down select-icon"></i>
+                        </div>
+                    </div>
+
+                    <!-- Выбор стиля контура и рамок -->
+                    <div class="setting-item">
+                        <span class="setting-label" data-i18n="uiStyleLabel">Frame & Contour Style</span>
+                        <div class="select-wrapper">
+                            <select id="ui-style-select" class="custom-select" aria-label="UI Style">
+                                <option value="liquid-glass" data-i18n="uiStyleLiquid">Glassmorphism (Volume)</option>
+                                <option value="soft-matte" data-i18n="uiStyleSoftMatte">Soft Matte (Solid Outline)</option>
+                                <option value="minimal" data-i18n="uiStyleMinimal">Flat Minimal (Clean Edge)</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down select-icon"></i>
+                        </div>
+                    </div>
+
                     <!-- Переключатель блюра UI элементов -->
                     <div class="setting-item">
                         <span class="setting-label" data-i18n="blurEnableLabel">UI Blur Effect</span>

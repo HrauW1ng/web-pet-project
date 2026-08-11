@@ -5,6 +5,8 @@ const IDB_KEY_BG = "customBgImage";
 
 const defaultConfig = {
   lang: "en",
+  palette: "default",
+  uiStyle: "liquid-glass",
   blur: {
     enabled: true,
     amount: 10,
@@ -32,6 +34,17 @@ const TRANSLATIONS = {
     tabCustomization: "Customization",
     tabWidgets: "Widgets",
     tabGeneral: "General",
+    paletteLabel: "Color Palette",
+    paletteDefault: "Default Glass",
+    paletteMocha: "Catppuccin Mocha",
+    paletteLatte: "Catppuccin Latte (Light)",
+    paletteNord: "Nordic Frost",
+    paletteSakura: "Sakura Pink",
+    paletteOled: "OLED Pitch Dark",
+    uiStyleLabel: "Frame & Contour Style",
+    uiStyleLiquid: "Glassmorphism (Volume)",
+    uiStyleSoftMatte: "Soft Matte (Solid Outline)",
+    uiStyleMinimal: "Flat Minimal (Clean Edge)",
     blurEnableLabel: "UI Blur Effect",
     blurAmountLabel: "UI Blur Intensity",
     bgTypeLabel: "Background",
@@ -43,7 +56,7 @@ const TRANSLATIONS = {
     bgImageLabel: "Select Image",
     bgImgBlurLabel: "Background Image Blur",
     chooseFileBtn: "Choose File",
-    customizationDesc: "Background selection, blur level, and theme options...",
+    customizationDesc: "Background selection, themes, palettes and UI options...",
     widgetsDesc: "Add and manage quick links under search bar.",
     languageLabel: "Language",
     searchPlaceholder: "Search the web…",
@@ -67,6 +80,17 @@ const TRANSLATIONS = {
     tabCustomization: "Кастомизация",
     tabWidgets: "Виджеты",
     tabGeneral: "Общие",
+    paletteLabel: "Цветовая палитра",
+    paletteDefault: "Стандартная Glass",
+    paletteMocha: "Catppuccin Mocha",
+    paletteLatte: "Catppuccin Latte (Светлая)",
+    paletteNord: "Nordic Frost",
+    paletteSakura: "Sakura Pink",
+    paletteOled: "OLED Глубокий темный",
+    uiStyleLabel: "Стиль контура и рамок",
+    uiStyleLiquid: "Glassmorphism (Объем и блики)",
+    uiStyleSoftMatte: "Soft Matte (Четкий контур)",
+    uiStyleMinimal: "Flat Minimal (Строгий)",
     blurEnableLabel: "Размытие UI (Blur)",
     blurAmountLabel: "Интенсивность UI размытия",
     bgTypeLabel: "Задний фон",
@@ -78,7 +102,7 @@ const TRANSLATIONS = {
     bgImageLabel: "Файл с ПК",
     bgImgBlurLabel: "Размытие фонового фото",
     chooseFileBtn: "Выбрать файл",
-    customizationDesc: "Выбор фона, настройка размытия и визуальные темы...",
+    customizationDesc: "Выбор фона, палитры, стиля меню и эффектов...",
     widgetsDesc: "Управление быстрым доступом и ссылками-плитками.",
     languageLabel: "Язык",
     searchPlaceholder: "Поиск в сети…",
@@ -100,7 +124,7 @@ let currentConfig = structuredClone(defaultConfig);
 let selectedTileIndex = null;
 let rafId = null;
 
-// --- Helper IndexedDB для надежного хранения тяжелых картинок ---
+// --- Helper IndexedDB ---
 function openIDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(IDB_NAME, 1);
@@ -177,6 +201,9 @@ function loadConfig() {
     const saved = localStorage.getItem(CONFIG_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
+      if (parsed.uiStyle === "rice") {
+        parsed.uiStyle = "soft-matte";
+      }
       return deepMerge(defaultConfig, parsed);
     }
   } catch (e) {
@@ -195,6 +222,20 @@ function saveConfig() {
   } catch (e) {
     console.error("Save config error:", e);
   }
+}
+
+function applyThemeSettings() {
+  const palette = currentConfig.palette || "default";
+  const uiStyle = currentConfig.uiStyle || "liquid-glass";
+
+  document.documentElement.setAttribute("data-palette", palette);
+  document.documentElement.setAttribute("data-ui-style", uiStyle);
+
+  const paletteSelect = document.getElementById("palette-select");
+  if (paletteSelect) paletteSelect.value = palette;
+
+  const uiStyleSelect = document.getElementById("ui-style-select");
+  if (uiStyleSelect) uiStyleSelect.value = uiStyle;
 }
 
 function applyBlurSettings() {
@@ -439,7 +480,7 @@ function closeTileEditForm() {
   renderLinksSettingsGrid();
 }
 
-// --- Асинхронная инициализация приложения ---
+// --- Инициализация ---
 async function initApp() {
   currentConfig = loadConfig();
 
@@ -451,6 +492,7 @@ async function initApp() {
   const dashboard = document.getElementById("dashboard");
   if (dashboard) renderHeroCard(dashboard, currentConfig);
 
+  applyThemeSettings();
   updateLanguage(currentConfig.lang || "en");
   applyBlurSettings();
   applyBgSettings();
@@ -458,6 +500,25 @@ async function initApp() {
 }
 
 initApp();
+
+// --- Переключение цветовых палитр и стилей UI ---
+const paletteSelect = document.getElementById("palette-select");
+if (paletteSelect) {
+  paletteSelect.addEventListener("change", (e) => {
+    currentConfig.palette = e.target.value;
+    saveConfig();
+    applyThemeSettings();
+  });
+}
+
+const uiStyleSelect = document.getElementById("ui-style-select");
+if (uiStyleSelect) {
+  uiStyleSelect.addEventListener("change", (e) => {
+    currentConfig.uiStyle = e.target.value;
+    saveConfig();
+    applyThemeSettings();
+  });
+}
 
 // --- События UI блюра ---
 const blurToggle = document.getElementById("blur-toggle");
@@ -649,14 +710,27 @@ function closeSettingsModal() {
   closeTileEditForm();
   settingsModal.classList.add("is-closing");
 
-  const handleAnimationEnd = (e) => {
-    if (e.target !== settingsModal) return;
-    settingsModal.classList.remove("is-closing");
-    settingsModal.close();
+  let isDone = false;
+  const finishClose = () => {
+    if (isDone) return;
+    isDone = true;
     settingsModal.removeEventListener("animationend", handleAnimationEnd);
+    settingsModal.classList.remove("is-closing");
+    if (settingsModal.open) {
+      settingsModal.close();
+    }
+  };
+
+  const handleAnimationEnd = (e) => {
+    if (e.target === settingsModal) {
+      finishClose();
+    }
   };
 
   settingsModal.addEventListener("animationend", handleAnimationEnd);
+
+  // Страховочный таймер: гарантирует закрытие при пропуске события браузером на крупном зуме
+  setTimeout(finishClose, 220);
 }
 
 if (dockbar) {
