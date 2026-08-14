@@ -14,7 +14,6 @@
   --accent-color: rgba(255, 255, 255, 0.22);
   --dropdown-bg: #3a3d44;
 
-  /* Переменные для кастомного скроллбара */
   --scrollbar-thumb: rgba(255, 255, 255, 0.25);
   --scrollbar-thumb-hover: rgba(255, 255, 255, 0.45);
 
@@ -94,13 +93,139 @@
   --scrollbar-thumb-hover: rgba(255, 255, 255, 0.55);
 }
 
+[data-palette="tokyo-night"] {
+  --panel-bg: rgba(26, 27, 38, 0.85);
+  --panel-border: rgba(122, 162, 247, 0.3);
+  --panel-border-hover: rgba(122, 162, 247, 0.6);
+  --input-bg: rgba(22, 22, 30, 0.75);
+  --input-focus-bg: rgba(41, 46, 66, 0.88);
+  --text-primary: #c0caf5;
+  --text-secondary: #9aa5ce;
+  --accent-color: rgba(122, 162, 247, 0.3);
+  --dropdown-bg: #1a1b26;
+  --scrollbar-thumb: rgba(122, 162, 247, 0.4);
+  --scrollbar-thumb-hover: rgba(122, 162, 247, 0.7);
+}
+
+[data-palette="gruvbox"] {
+  --panel-bg: rgba(40, 40, 40, 0.88);
+  --panel-border: rgba(250, 189, 47, 0.3);
+  --panel-border-hover: rgba(250, 189, 47, 0.6);
+  --input-bg: rgba(29, 32, 33, 0.8);
+  --input-focus-bg: rgba(60, 56, 54, 0.9);
+  --text-primary: #ebdbb2;
+  --text-secondary: #a89984;
+  --accent-color: rgba(250, 189, 47, 0.25);
+  --dropdown-bg: #282828;
+  --scrollbar-thumb: rgba(250, 189, 47, 0.35);
+  --scrollbar-thumb-hover: rgba(250, 189, 47, 0.65);
+}
+
+[data-palette="dracula"] {
+  --panel-bg: rgba(40, 42, 54, 0.85);
+  --panel-border: rgba(189, 147, 249, 0.3);
+  --panel-border-hover: rgba(255, 121, 198, 0.6);
+  --input-bg: rgba(33, 34, 44, 0.8);
+  --input-focus-bg: rgba(68, 71, 90, 0.9);
+  --text-primary: #f8f8f2;
+  --text-secondary: #6272a4;
+  --accent-color: rgba(189, 147, 249, 0.3);
+  --dropdown-bg: #282a36;
+  --scrollbar-thumb: rgba(189, 147, 249, 0.4);
+  --scrollbar-thumb-hover: rgba(255, 121, 198, 0.7);
+}
+
+[data-palette="cyberpunk"] {
+  --panel-bg: rgba(18, 12, 31, 0.88);
+  --panel-border: rgba(255, 0, 127, 0.4);
+  --panel-border-hover: rgba(0, 240, 255, 0.7);
+  --input-bg: rgba(26, 17, 46, 0.85);
+  --input-focus-bg: rgba(45, 23, 77, 0.92);
+  --text-primary: #00f0ff;
+  --text-secondary: #ff007f;
+  --accent-color: rgba(255, 0, 127, 0.35);
+  --dropdown-bg: #120c1f;
+  --scrollbar-thumb: rgba(0, 240, 255, 0.5);
+  --scrollbar-thumb-hover: rgba(255, 0, 127, 0.8);
+}
+
+[data-palette="rose-pine"] {
+  --panel-bg: rgba(25, 23, 36, 0.85);
+  --panel-border: rgba(235, 188, 186, 0.28);
+  --panel-border-hover: rgba(196, 167, 231, 0.55);
+  --input-bg: rgba(31, 29, 46, 0.8);
+  --input-focus-bg: rgba(38, 35, 58, 0.9);
+  --text-primary: #e0def4;
+  --text-secondary: #908caa;
+  --accent-color: rgba(196, 167, 231, 0.28);
+  --dropdown-bg: #191724;
+  --scrollbar-thumb: rgba(196, 167, 231, 0.35);
+  --scrollbar-thumb-hover: rgba(235, 188, 186, 0.65);
+}
+
+[data-palette="emerald"] {
+  --panel-bg: rgba(6, 28, 20, 0.88);
+  --panel-border: rgba(52, 211, 153, 0.3);
+  --panel-border-hover: rgba(52, 211, 153, 0.6);
+  --input-bg: rgba(4, 20, 14, 0.82);
+  --input-focus-bg: rgba(12, 44, 32, 0.92);
+  --text-primary: #a7f3d0;
+  --text-secondary: #34d399;
+  --accent-color: rgba(52, 211, 153, 0.28);
+  --dropdown-bg: #061c14;
+  --scrollbar-thumb: rgba(52, 211, 153, 0.4);
+  --scrollbar-thumb-hover: rgba(52, 211, 153, 0.7);
+}
+
+[data-palette="amber"] {
+  --panel-bg: rgba(20, 14, 2, 0.92);
+  --panel-border: rgba(251, 191, 36, 0.35);
+  --panel-border-hover: rgba(251, 191, 36, 0.7);
+  --input-bg: rgba(35, 24, 4, 0.85);
+  --input-focus-bg: rgba(55, 38, 6, 0.95);
+  --text-primary: #fbbf24;
+  --text-secondary: #d97706;
+  --accent-color: rgba(251, 191, 36, 0.3);
+  --dropdown-bg: #140e02;
+  --scrollbar-thumb: rgba(251, 191, 36, 0.4);
+  --scrollbar-thumb-hover: rgba(251, 191, 36, 0.75);
+}
+
+[data-palette="synthwave"] {
+  --panel-bg: rgba(36, 27, 47, 0.88);
+  --panel-border: rgba(254, 68, 166, 0.35);
+  --panel-border-hover: rgba(255, 221, 0, 0.65);
+  --input-bg: rgba(26, 19, 35, 0.8);
+  --input-focus-bg: rgba(52, 38, 68, 0.92);
+  --text-primary: #fede5d;
+  --text-secondary: #fe44a6;
+  --accent-color: rgba(254, 68, 166, 0.3);
+  --dropdown-bg: #241b2f;
+  --scrollbar-thumb: rgba(254, 68, 166, 0.4);
+  --scrollbar-thumb-hover: rgba(255, 221, 0, 0.7);
+}
+
+[data-palette="solarized"] {
+  --panel-bg: rgba(7, 54, 66, 0.88);
+  --panel-border: rgba(42, 161, 152, 0.3);
+  --panel-border-hover: rgba(181, 137, 0, 0.6);
+  --input-bg: rgba(0, 43, 54, 0.82);
+  --input-focus-bg: rgba(10, 64, 78, 0.92);
+  --text-primary: #93a1a1;
+  --text-secondary: #2aa198;
+  --accent-color: rgba(42, 161, 152, 0.28);
+  --dropdown-bg: #073642;
+  --scrollbar-thumb: rgba(42, 161, 152, 0.4);
+  --scrollbar-thumb-hover: rgba(181, 137, 0, 0.7);
+}
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
-/* --- Кастомная полоса прокрутки (Scrollbar) --- */
+/* --- Кастомная полоса прокрутки --- */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) transparent;
@@ -178,7 +303,6 @@ body {
   transform: translateZ(0);
 }
 
-/* Поисковая строка */
 .hero-search {
   margin-bottom: 1.25rem;
 }
@@ -526,6 +650,12 @@ body {
   line-height: 1.4;
 }
 
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--panel-border);
+  margin: 1.25rem 0;
+}
+
 /* --- 6. Элементы управления --- */
 .setting-item {
   display: flex;
@@ -619,6 +749,24 @@ body {
   padding-bottom: 0;
   border-bottom-color: transparent;
   pointer-events: none;
+}
+
+.sub-setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+  padding-left: 0.65rem;
+  border-left: 2px solid var(--panel-border);
+  transition: all 0.3s ease;
+}
+
+.sub-setting-group.is-hidden {
+  display: none !important;
+}
+
+.sub-setting-item {
+  padding: 0.5rem 0;
 }
 
 .setting-label-group {
@@ -740,7 +888,7 @@ body {
   cursor: pointer;
 }
 
-/* --- 7. Вкладка Widgets --- */
+/* --- 7. Вкладка Widgets & Стили Часов --- */
 .widgets-section-header {
   display: flex;
   justify-content: space-between;
@@ -748,6 +896,243 @@ body {
   margin-bottom: 0.75rem;
 }
 
+/* Виджет Часов */
+.clock-widget {
+  position: fixed;
+  left: 50%;
+  top: 22%;
+  transform: translate(-50%, -50%) scale(var(--clock-scale, 1));
+  transform-origin: center center;
+  z-index: 10;
+  user-select: none;
+  color: var(--clock-color, #ffffff);
+  text-align: center;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.clock-widget.is-hidden {
+  display: none !important;
+}
+
+.clock-widget.is-editing {
+  outline: 2px dashed var(--panel-border-hover);
+  outline-offset: 12px;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  cursor: move;
+}
+
+.digital-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.digital-clock__time {
+  font-size: 5.25rem;
+  font-weight: 200;
+  line-height: 1;
+  letter-spacing: -2px;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.digital-clock__date {
+  font-size: 1.1rem;
+  font-weight: 400;
+  margin-top: 0.35rem;
+  opacity: 0.9;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.5px;
+}
+
+/* --- Различные варианты стилей часов --- */
+
+/* 1. Digital Cards Style */
+.clock-card-style .card-digits-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.clock-card-style .digit-card {
+  display: inline-block;
+  padding: 0.4rem 0.85rem;
+  font-size: 4.5rem;
+  font-weight: 300;
+  line-height: 1;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(var(--backdrop-blur));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  font-variant-numeric: tabular-nums;
+}
+
+.clock-card-style .card-sep {
+  font-size: 3.5rem;
+  font-weight: 200;
+  opacity: 0.7;
+}
+
+/* 2. Cyber Neon Style */
+.clock-style-neon .digital-clock__time {
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 700;
+  text-shadow:
+    0 0 10px var(--clock-color),
+    0 0 20px var(--clock-color),
+    0 0 40px var(--clock-color);
+  letter-spacing: 2px;
+}
+
+.clock-style-neon .digital-clock__date {
+  font-family: 'Courier New', Courier, monospace;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* 3. Retro Matrix / LED Style */
+.clock-style-retro .digital-clock__time {
+  font-family: monospace;
+  letter-spacing: 4px;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--panel-border);
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 0 8px var(--clock-color);
+}
+
+/* 4. Analog Wall Clock */
+.analog-clock {
+  width: 140px;
+  height: 140px;
+  border: 3px solid currentColor;
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.15);
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(4px);
+  margin: auto;
+}
+
+.analog-clock.analog-minimal {
+  border-width: 1.5px;
+  border-style: dashed;
+  background: transparent;
+  box-shadow: none;
+}
+
+.analog-center {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: currentColor;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+}
+
+.analog-hand {
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  transform-origin: bottom center;
+  background: currentColor;
+  border-radius: 4px;
+}
+
+.analog-hand.hour {
+  width: 4px;
+  height: 35%;
+  margin-left: -2px;
+}
+
+.analog-hand.minute {
+  width: 3px;
+  height: 45%;
+  margin-left: -1.5px;
+}
+
+.analog-hand.second {
+  width: 1.5px;
+  height: 48%;
+  margin-left: -0.75px;
+  opacity: 0.85;
+}
+
+.analog-hand.second.is-hidden {
+  display: none !important;
+}
+
+/* Маркер масштабирования часов */
+.clock-resize-handle {
+  display: none;
+  position: absolute;
+  bottom: -18px;
+  right: -18px;
+  width: 28px;
+  height: 28px;
+  background: var(--input-focus-bg);
+  border: 1px solid var(--panel-border-hover);
+  border-radius: 50%;
+  color: var(--text-primary);
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  cursor: se-resize;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease;
+}
+
+.clock-resize-handle:hover {
+  transform: scale(1.15);
+}
+
+.clock-widget.is-editing .clock-resize-handle {
+  display: flex;
+}
+
+/* Верхняя плашка режима редактирования */
+.clock-edit-bar {
+  position: fixed;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.65rem 1.25rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border-hover);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(var(--backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--backdrop-blur));
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  animation: modal-show 0.2s ease forwards;
+}
+
+.clock-edit-bar.is-hidden {
+  display: none !important;
+}
+
+body.clock-edit-mode #dashboard,
+body.clock-edit-mode #dockbar {
+  pointer-events: none;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+/* Плитки ссылок */
 .links-settings-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -895,6 +1280,7 @@ body {
 /* Style 2: Soft Matte (Solid Outline) */
 [data-ui-style="soft-matte"] .hero-card,
 [data-ui-style="soft-matte"] .dockbar,
+[data-ui-style="soft-matte"] .clock-edit-bar,
 [data-ui-style="soft-matte"] #settings-modal {
   border: 1.5px solid var(--panel-border-hover);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
@@ -935,6 +1321,7 @@ body {
 
 [data-ui-style="minimal"] .hero-card,
 [data-ui-style="minimal"] .dockbar,
+[data-ui-style="minimal"] .clock-edit-bar,
 [data-ui-style="minimal"] #settings-modal {
   box-shadow: none;
   border: 1px solid var(--panel-border);

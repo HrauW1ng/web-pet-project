@@ -18,6 +18,15 @@ const defaultConfig = {
     image: "",
     imgBlur: 8,
   },
+  clock: {
+    enabled: false,
+    seconds: false,
+    color: "#ffffff",
+    style: "digital", // 'digital' | 'digital-card' | 'neon-glow' | 'retro-led' | 'analog' | 'analog-minimal'
+    x: 50,
+    y: 22,
+    size: 100,
+  },
   search: {
     placeholder: "Search the web…",
     urlTemplate: "https://www.google.com/search?q={query}",
@@ -37,10 +46,19 @@ const TRANSLATIONS = {
     paletteLabel: "Color Palette",
     paletteDefault: "Default Glass",
     paletteMocha: "Catppuccin Mocha",
-    paletteLatte: "Catppuccin Latte (Light)",
+    paletteLatte: "Catppuccin Latte",
     paletteNord: "Nordic Frost",
     paletteSakura: "Sakura Pink",
     paletteOled: "OLED Pitch Dark",
+    paletteTokyoNight: "Tokyo Night",
+    paletteGruvbox: "Gruvbox Dark",
+    paletteDracula: "Dracula",
+    paletteCyberpunk: "Cyberpunk Neon",
+    paletteRosePine: "Rosé Pine",
+    paletteEmerald: "Midnight Emerald",
+    paletteAmber: "Amber CRT Terminal",
+    paletteSynthwave: "Synthwave '84",
+    paletteSolarized: "Solarized Dark",
     uiStyleLabel: "Frame & Contour Style",
     uiStyleLiquid: "Glassmorphism (Volume)",
     uiStyleSoftMatte: "Soft Matte (Solid Outline)",
@@ -58,6 +76,22 @@ const TRANSLATIONS = {
     chooseFileBtn: "Choose File",
     customizationDesc: "Background selection, themes, palettes and UI options...",
     widgetsDesc: "Add and manage quick links under search bar.",
+    clockTitle: "Clock Widget",
+    clockDesc: "Display customizable clock on your dashboard.",
+    clockEnableLabel: "Enable Clock",
+    clockSecondsLabel: "Show Seconds",
+    clockColorLabel: "Clock Color",
+    clockStyleLabel: "Clock Style",
+    clockStyleDigital: "Digital Minimal",
+    clockStyleDigitalCard: "Digital Cards",
+    clockStyleNeonGlow: "Cyber Neon",
+    clockStyleRetroLed: "Retro Matrix / LED",
+    clockStyleAnalog: "Analog Classic",
+    clockStyleAnalogMinimal: "Analog Minimal Dots",
+    clockPositionLabel: "Position & Size",
+    clockEditPosBtn: "Move & Resize Widget",
+    clockEditingNotice: "Drag clock to move. Use corner handle to resize.",
+    clockDoneBtn: "Done",
     languageLabel: "Language",
     searchPlaceholder: "Search the web…",
     quickLinksTitle: "Quick Links",
@@ -83,10 +117,19 @@ const TRANSLATIONS = {
     paletteLabel: "Цветовая палитра",
     paletteDefault: "Стандартная Glass",
     paletteMocha: "Catppuccin Mocha",
-    paletteLatte: "Catppuccin Latte (Светлая)",
+    paletteLatte: "Catppuccin Latte",
     paletteNord: "Nordic Frost",
     paletteSakura: "Sakura Pink",
     paletteOled: "OLED Глубокий темный",
+    paletteTokyoNight: "Tokyo Night",
+    paletteGruvbox: "Gruvbox Dark",
+    paletteDracula: "Dracula",
+    paletteCyberpunk: "Cyberpunk Neon",
+    paletteRosePine: "Rosé Pine",
+    paletteEmerald: "Midnight Emerald",
+    paletteAmber: "Amber CRT Терминал",
+    paletteSynthwave: "Synthwave '84",
+    paletteSolarized: "Solarized Dark",
     uiStyleLabel: "Стиль контура и рамок",
     uiStyleLiquid: "Glassmorphism (Объем и блики)",
     uiStyleSoftMatte: "Soft Matte (Четкий контур)",
@@ -104,6 +147,22 @@ const TRANSLATIONS = {
     chooseFileBtn: "Выбрать файл",
     customizationDesc: "Выбор фона, палитры, стиля меню и эффектов...",
     widgetsDesc: "Управление быстрым доступом и ссылками-плитками.",
+    clockTitle: "Виджет часов",
+    clockDesc: "Отображение настраиваемых часов на рабочем столе.",
+    clockEnableLabel: "Включить часы",
+    clockSecondsLabel: "Отображать секунды",
+    clockColorLabel: "Цвет часов",
+    clockStyleLabel: "Стиль часов",
+    clockStyleDigital: "Цифровые (Минимализм)",
+    clockStyleDigitalCard: "Цифровые (Карточки)",
+    clockStyleNeonGlow: "Кибер-неон",
+    clockStyleRetroLed: "Ретро Матрица / LED",
+    clockStyleAnalog: "Аналоговые (Классика)",
+    clockStyleAnalogMinimal: "Аналоговые (Минимал)",
+    clockPositionLabel: "Позиция и размер",
+    clockEditPosBtn: "Переместить и изменить размер",
+    clockEditingNotice: "Зажмите и тяните часы для перемещения. Используйте уголок для размера.",
+    clockDoneBtn: "Готово",
     languageLabel: "Язык",
     searchPlaceholder: "Поиск в сети…",
     quickLinksTitle: "Быстрые ссылки",
@@ -123,6 +182,7 @@ const TRANSLATIONS = {
 let currentConfig = structuredClone(defaultConfig);
 let selectedTileIndex = null;
 let rafId = null;
+let clockIntervalId = null;
 
 // --- Helper IndexedDB ---
 function openIDB() {
@@ -170,7 +230,6 @@ async function loadImageFromIDB() {
   }
 }
 
-// --- Вспомогательные функции глубокого слияния объектов ---
 function isObject(item) {
   return item && typeof item === "object" && !Array.isArray(item);
 }
@@ -322,6 +381,238 @@ function applyBgSettings() {
   if (imgBlurWrapper) bg.type === "image" ? imgBlurWrapper.classList.remove("is-hidden") : imgBlurWrapper.classList.add("is-hidden");
 }
 
+// --- Логика виджета часов ---
+function startClockTimer() {
+  if (clockIntervalId) clearInterval(clockIntervalId);
+  updateClockDisplay();
+  clockIntervalId = setInterval(updateClockDisplay, 1000);
+}
+
+function updateClockDisplay() {
+  if (!currentConfig.clock || !currentConfig.clock.enabled) return;
+  const clockEl = document.getElementById("clock-widget");
+  if (!clockEl) return;
+
+  const content = clockEl.querySelector(".clock-content");
+  if (!content) return;
+
+  const now = new Date();
+  const style = currentConfig.clock.style || "digital";
+  const showSecs = !!currentConfig.clock.seconds;
+
+  const hours = String(now.getHours()).padStart(2, "0");
+  const mins = String(now.getMinutes()).padStart(2, "0");
+  const secs = String(now.getSeconds()).padStart(2, "0");
+
+  const daysEn = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const monthsEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const daysRu = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
+  const monthsRu = ["янв.", "февр.", "марта", "апр.", "мая", "июня", "июля", "авг.", "сент.", "окт.", "нояб.", "дек."];
+
+  const isRu = currentConfig.lang === "ru";
+  const dayName = isRu ? daysRu[now.getDay()] : daysEn[now.getDay()];
+  const monthName = isRu ? monthsRu[now.getMonth()] : monthsEn[now.getMonth()];
+  const dateStr = `${dayName}, ${now.getDate()} ${monthName}`;
+
+  if (style.startsWith("analog")) {
+    const secVal = now.getSeconds();
+    const minVal = now.getMinutes();
+    const hourVal = now.getHours() % 12;
+
+    const secDeg = secVal * 6;
+    const minDeg = (minVal + secVal / 60) * 6;
+    const hourDeg = (hourVal + minVal / 60) * 30;
+
+    let analogEl = content.querySelector(".analog-clock");
+    if (!analogEl) {
+      const isMinimal = style === "analog-minimal";
+      content.innerHTML = `
+        <div class="analog-clock ${isMinimal ? "analog-minimal" : ""}">
+          <div class="analog-hand hour"></div>
+          <div class="analog-hand minute"></div>
+          <div class="analog-hand second ${showSecs ? "" : "is-hidden"}"></div>
+          <div class="analog-center"></div>
+        </div>
+      `;
+    }
+
+    const hHand = content.querySelector(".analog-hand.hour");
+    const mHand = content.querySelector(".analog-hand.minute");
+    const sHand = content.querySelector(".analog-hand.second");
+
+    if (hHand) hHand.style.transform = `rotate(${hourDeg}deg)`;
+    if (mHand) mHand.style.transform = `rotate(${minDeg}deg)`;
+    if (sHand) {
+      sHand.style.transform = `rotate(${secDeg}deg)`;
+      if (showSecs) {
+        sHand.classList.remove("is-hidden");
+      } else {
+        sHand.classList.add("is-hidden");
+      }
+    }
+  } else if (style === "digital-card") {
+    const timeHtml = `
+      <div class="digital-clock clock-card-style">
+        <div class="card-digits-wrapper">
+          <span class="digit-card">${hours}</span>
+          <span class="card-sep">:</span>
+          <span class="digit-card">${mins}</span>
+          ${showSecs ? `<span class="card-sep">:</span><span class="digit-card seconds-card">${secs}</span>` : ""}
+        </div>
+        <div class="digital-clock__date">${dateStr}</div>
+      </div>
+    `;
+    content.innerHTML = timeHtml;
+  } else {
+    // digital, neon-glow, retro-led
+    const timeStr = showSecs ? `${hours}:${mins}:${secs}` : `${hours}:${mins}`;
+    let styleClass = "digital-clock";
+    if (style === "neon-glow") styleClass += " clock-style-neon";
+    if (style === "retro-led") styleClass += " clock-style-retro";
+
+    content.innerHTML = `
+      <div class="${styleClass}">
+        <div class="digital-clock__time">${timeStr}</div>
+        <div class="digital-clock__date">${dateStr}</div>
+      </div>
+    `;
+  }
+}
+
+function applyClockSettings() {
+  if (!currentConfig.clock) currentConfig.clock = { ...defaultConfig.clock };
+  const c = currentConfig.clock;
+
+  const clockEl = document.getElementById("clock-widget");
+  const toggle = document.getElementById("clock-toggle");
+  const secondsToggle = document.getElementById("clock-seconds-toggle");
+  const subSettings = document.getElementById("clock-sub-settings");
+  const colorPicker = document.getElementById("clock-color-picker");
+  const styleSelect = document.getElementById("clock-style-select");
+
+  if (toggle) toggle.checked = !!c.enabled;
+  if (secondsToggle) secondsToggle.checked = !!c.seconds;
+  if (colorPicker) colorPicker.value = c.color || "#ffffff";
+  if (styleSelect) styleSelect.value = c.style || "digital";
+
+  if (subSettings) {
+    if (c.enabled) {
+      subSettings.classList.remove("is-hidden");
+    } else {
+      subSettings.classList.add("is-hidden");
+    }
+  }
+
+  if (clockEl) {
+    if (c.enabled) {
+      clockEl.classList.remove("is-hidden");
+    } else {
+      clockEl.classList.add("is-hidden");
+    }
+
+    clockEl.style.left = `${c.x !== undefined ? c.x : 50}%`;
+    clockEl.style.top = `${c.y !== undefined ? c.y : 22}%`;
+    clockEl.style.setProperty("--clock-color", c.color || "#ffffff");
+    clockEl.style.setProperty("--clock-scale", (c.size || 100) / 100);
+  }
+
+  const content = clockEl ? clockEl.querySelector(".clock-content") : null;
+  if (content) content.innerHTML = "";
+
+  updateClockDisplay();
+}
+
+function initClockDragAndResize() {
+  const clockEl = document.getElementById("clock-widget");
+  const handle = document.getElementById("clock-resize-handle");
+  const editBtn = document.getElementById("clock-edit-pos-btn");
+  const saveBtn = document.getElementById("clock-save-pos-btn");
+  const editBar = document.getElementById("clock-edit-bar");
+
+  if (!clockEl) return;
+
+  let isDragging = false;
+  let isResizing = false;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+  let startResizeX = 0;
+  let startResizeScale = 100;
+
+  function enterEditMode() {
+    closeSettingsModal();
+    document.body.classList.add("clock-edit-mode");
+    clockEl.classList.add("is-editing");
+    if (editBar) editBar.classList.remove("is-hidden");
+  }
+
+  function exitEditMode() {
+    document.body.classList.remove("clock-edit-mode");
+    clockEl.classList.remove("is-editing");
+    if (editBar) editBar.classList.add("is-hidden");
+    saveConfig();
+  }
+
+  if (editBtn) editBtn.addEventListener("click", enterEditMode);
+  if (saveBtn) saveBtn.addEventListener("click", exitEditMode);
+
+  clockEl.addEventListener("mousedown", (e) => {
+    if (!clockEl.classList.contains("is-editing")) return;
+    if (e.target.closest("#clock-resize-handle")) return;
+
+    isDragging = true;
+    const mouseX = (e.clientX / window.innerWidth) * 100;
+    const mouseY = (e.clientY / window.innerHeight) * 100;
+
+    dragOffsetX = mouseX - (currentConfig.clock.x || 50);
+    dragOffsetY = mouseY - (currentConfig.clock.y || 22);
+
+    e.preventDefault();
+  });
+
+  if (handle) {
+    handle.addEventListener("mousedown", (e) => {
+      if (!clockEl.classList.contains("is-editing")) return;
+
+      isResizing = true;
+      startResizeX = e.clientX;
+      startResizeScale = currentConfig.clock.size || 100;
+
+      e.preventDefault();
+      e.stopPropagation();
+    });
+  }
+
+  window.addEventListener("mousemove", (e) => {
+    if (isDragging) {
+      const mouseX = (e.clientX / window.innerWidth) * 100;
+      const mouseY = (e.clientY / window.innerHeight) * 100;
+
+      let newX = Math.max(5, Math.min(95, mouseX - dragOffsetX));
+      let newY = Math.max(5, Math.min(95, mouseY - dragOffsetY));
+
+      currentConfig.clock.x = newX;
+      currentConfig.clock.y = newY;
+
+      clockEl.style.left = `${newX}%`;
+      clockEl.style.top = `${newY}%`;
+    } else if (isResizing) {
+      const deltaX = e.clientX - startResizeX;
+      let newSize = Math.max(50, Math.min(250, startResizeScale + deltaX * 0.5));
+
+      currentConfig.clock.size = newSize;
+      clockEl.style.setProperty("--clock-scale", newSize / 100);
+    }
+  });
+
+  window.addEventListener("mouseup", () => {
+    if (isDragging || isResizing) {
+      isDragging = false;
+      isResizing = false;
+      saveConfig();
+    }
+  });
+}
+
 function updateLanguage(lang) {
   currentConfig.lang = lang;
   saveConfig();
@@ -351,6 +642,8 @@ function updateLanguage(lang) {
 
   const langSelect = document.getElementById("lang-select");
   if (langSelect && langSelect.value !== lang) langSelect.value = lang;
+
+  updateClockDisplay();
 }
 
 function renderHeroCard(container, config) {
@@ -496,6 +789,9 @@ async function initApp() {
   updateLanguage(currentConfig.lang || "en");
   applyBlurSettings();
   applyBgSettings();
+  applyClockSettings();
+  initClockDragAndResize();
+  startClockTimer();
   renderLinksSettingsGrid();
 }
 
@@ -639,6 +935,51 @@ if (bgImgBlurRange) {
   });
 }
 
+// --- События часов ---
+const clockToggle = document.getElementById("clock-toggle");
+if (clockToggle) {
+  clockToggle.addEventListener("change", (e) => {
+    if (!currentConfig.clock) currentConfig.clock = { ...defaultConfig.clock };
+    currentConfig.clock.enabled = e.target.checked;
+    saveConfig();
+    applyClockSettings();
+  });
+}
+
+const clockSecondsToggle = document.getElementById("clock-seconds-toggle");
+if (clockSecondsToggle) {
+  clockSecondsToggle.addEventListener("change", (e) => {
+    if (!currentConfig.clock) currentConfig.clock = { ...defaultConfig.clock };
+    currentConfig.clock.seconds = e.target.checked;
+    saveConfig();
+    applyClockSettings();
+  });
+}
+
+const clockColorPicker = document.getElementById("clock-color-picker");
+if (clockColorPicker) {
+  clockColorPicker.addEventListener("input", (e) => {
+    const clockEl = document.getElementById("clock-widget");
+    if (clockEl) clockEl.style.setProperty("--clock-color", e.target.value);
+  });
+
+  clockColorPicker.addEventListener("change", (e) => {
+    if (!currentConfig.clock) currentConfig.clock = { ...defaultConfig.clock };
+    currentConfig.clock.color = e.target.value;
+    saveConfig();
+  });
+}
+
+const clockStyleSelect = document.getElementById("clock-style-select");
+if (clockStyleSelect) {
+  clockStyleSelect.addEventListener("change", (e) => {
+    if (!currentConfig.clock) currentConfig.clock = { ...defaultConfig.clock };
+    currentConfig.clock.style = e.target.value;
+    saveConfig();
+    applyClockSettings();
+  });
+}
+
 // --- Кнопка "Добавить ссылку" ---
 const addTileBtn = document.getElementById("add-tile-btn");
 if (addTileBtn) {
@@ -728,8 +1069,6 @@ function closeSettingsModal() {
   };
 
   settingsModal.addEventListener("animationend", handleAnimationEnd);
-
-  // Страховочный таймер: гарантирует закрытие при пропуске события браузером на крупном зуме
   setTimeout(finishClose, 220);
 }
 

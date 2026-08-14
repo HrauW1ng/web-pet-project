@@ -11,6 +11,23 @@
     <div id="page-bg" aria-hidden="true"></div>
     <main id="dashboard"></main>
 
+    <!-- Виджет часов -->
+    <div id="clock-widget" class="clock-widget is-hidden" aria-label="Clock Widget">
+        <div class="clock-content"></div>
+        <div id="clock-resize-handle" class="clock-resize-handle" title="Resize">
+            <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+        </div>
+    </div>
+
+    <!-- Верхняя панель управления в режиме редактирования часов -->
+    <div id="clock-edit-bar" class="clock-edit-bar is-hidden">
+        <span data-i18n="clockEditingNotice">Drag clock to move. Use corner handle to resize.</span>
+        <button type="button" id="clock-save-pos-btn" class="btn btn-primary">
+            <i class="fa-solid fa-check"></i>
+            <span data-i18n="clockDoneBtn">Done</span>
+        </button>
+    </div>
+
     <aside id="dockbar" class="dockbar" aria-label="Quick Dock">
         <button class="dock-btn" id="dock-settings" title="Settings" data-i18n-title="dockSettings">
             <i class="fa-solid fa-gear"></i>
@@ -55,6 +72,15 @@
                                 <option value="nord" data-i18n="paletteNord">Nordic Frost</option>
                                 <option value="sakura" data-i18n="paletteSakura">Sakura Pink</option>
                                 <option value="oled" data-i18n="paletteOled">OLED Pitch Dark</option>
+                                <option value="tokyo-night" data-i18n="paletteTokyoNight">Tokyo Night</option>
+                                <option value="gruvbox" data-i18n="paletteGruvbox">Gruvbox Dark</option>
+                                <option value="dracula" data-i18n="paletteDracula">Dracula</option>
+                                <option value="cyberpunk" data-i18n="paletteCyberpunk">Cyberpunk Neon</option>
+                                <option value="rose-pine" data-i18n="paletteRosePine">Rosé Pine</option>
+                                <option value="emerald" data-i18n="paletteEmerald">Midnight Emerald</option>
+                                <option value="amber" data-i18n="paletteAmber">Amber CRT Terminal</option>
+                                <option value="synthwave" data-i18n="paletteSynthwave">Synthwave '84</option>
+                                <option value="solarized" data-i18n="paletteSolarized">Solarized Dark</option>
                             </select>
                             <i class="fa-solid fa-chevron-down select-icon"></i>
                         </div>
@@ -148,6 +174,64 @@
 
                 <section id="tab-widgets" class="tab-pane">
                     <div class="widgets-section">
+                        <!-- Секция Виджет часов -->
+                        <div class="widgets-section-header">
+                            <div>
+                                <h3 data-i18n="clockTitle">Clock Widget</h3>
+                                <p class="tab-desc" data-i18n="clockDesc">Display customizable clock on your dashboard.</p>
+                            </div>
+                        </div>
+
+                        <div class="setting-item">
+                            <span class="setting-label" data-i18n="clockEnableLabel">Clock Widget</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="clock-toggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <!-- Под-настройки часов (появляются только при включенных часах) -->
+                        <div id="clock-sub-settings" class="sub-setting-group is-hidden">
+                            <div class="setting-item sub-setting-item">
+                                <span class="setting-label" data-i18n="clockSecondsLabel">Show Seconds</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="clock-seconds-toggle">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="setting-item sub-setting-item">
+                                <span class="setting-label" data-i18n="clockColorLabel">Clock Color</span>
+                                <input type="color" id="clock-color-picker" class="custom-color-picker" value="#ffffff">
+                            </div>
+
+                            <div class="setting-item sub-setting-item">
+                                <span class="setting-label" data-i18n="clockStyleLabel">Clock Style</span>
+                                <div class="select-wrapper">
+                                    <select id="clock-style-select" class="custom-select" aria-label="Clock Style">
+                                        <option value="digital" data-i18n="clockStyleDigital">Digital Minimal</option>
+                                        <option value="digital-card" data-i18n="clockStyleDigitalCard">Digital Cards</option>
+                                        <option value="neon-glow" data-i18n="clockStyleNeonGlow">Cyber Neon</option>
+                                        <option value="retro-led" data-i18n="clockStyleRetroLed">Retro Matrix / LED</option>
+                                        <option value="analog" data-i18n="clockStyleAnalog">Analog Classic</option>
+                                        <option value="analog-minimal" data-i18n="clockStyleAnalogMinimal">Analog Minimal Dots</option>
+                                    </select>
+                                    <i class="fa-solid fa-chevron-down select-icon"></i>
+                                </div>
+                            </div>
+
+                            <div class="setting-item sub-setting-item">
+                                <span class="setting-label" data-i18n="clockPositionLabel">Position & Size</span>
+                                <button type="button" id="clock-edit-pos-btn" class="btn btn-secondary">
+                                    <i class="fa-solid fa-up-down-left-right"></i>
+                                    <span data-i18n="clockEditPosBtn">Move & Resize</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <hr class="section-divider">
+
+                        <!-- Секция Быстрые ссылки -->
                         <div class="widgets-section-header">
                             <div>
                                 <h3 data-i18n="quickLinksTitle">Quick Links</h3>
