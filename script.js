@@ -1358,3 +1358,19 @@ if (profileModal) {
     closeProfileModal();
   });
 }
+// Перехват ввода: если начинаешь печатать, фокус сразу летит в поисковую строку
+window.addEventListener("keydown", (e) => {
+  const activeEl = document.activeElement;
+  
+  // Если фокус уже в инпуте или нажаты системные клавиши (Ctrl, Alt, Cmd, Tab, Esc)
+  if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA")) return;
+  if (e.ctrlKey || e.altKey || e.metaKey || e.key === "Tab" || e.key === "Escape") return;
+  
+  // Игнорируем служебные клавиши F1-F12, CapsLock и т.д.
+  if (e.key.length > 1) return;
+
+  const searchInput = document.querySelector(".hero-search__input");
+  if (searchInput) {
+    searchInput.focus();
+  }
+});
