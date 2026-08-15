@@ -22,10 +22,16 @@ const defaultConfig = {
     enabled: false,
     seconds: false,
     color: "#ffffff",
-    style: "digital", // 'digital' | 'digital-card' | 'neon-glow' | 'retro-led' | 'analog' | 'analog-minimal'
+    style: "digital",
     x: 50,
     y: 22,
     size: 100,
+  },
+  profile: {
+    nickname: "User",
+    location: "Kyiv",
+    lat: 50.45,
+    lon: 30.52,
   },
   search: {
     placeholder: "Search the web…",
@@ -39,7 +45,7 @@ const TRANSLATIONS = {
     modalTitle: "Settings",
     closeBtn: "Close",
     dockSettings: "Settings",
-    dockAccount: "Account",
+    dockProfile: "Local Profile",
     tabCustomization: "Customization",
     tabWidgets: "Widgets",
     tabGeneral: "General",
@@ -105,12 +111,22 @@ const TRANSLATIONS = {
     cancelBtn: "Cancel",
     saveBtn: "Save",
     deleteBtn: "Delete",
+    profileModalTitle: "Local Profile",
+    nicknameLabel: "Nickname",
+    weatherTitle: "Location & Weather",
+    configBackupTitle: "Config Backup (JSON)",
+    configBackupDesc: "Export your dashboard configuration or restore it from a file.",
+    exportJsonBtn: "Export JSON",
+    importJsonBtn: "Import JSON",
+    weatherLoading: "Loading weather...",
+    weatherNotFound: "City not found",
+    weatherError: "Weather fetch failed",
   },
   ru: {
     modalTitle: "Настройки",
     closeBtn: "Закрыть",
     dockSettings: "Настройки",
-    dockAccount: "Аккаунт",
+    dockProfile: "Локальный профиль",
     tabCustomization: "Кастомизация",
     tabWidgets: "Виджеты",
     tabGeneral: "Общие",
@@ -176,6 +192,16 @@ const TRANSLATIONS = {
     cancelBtn: "Отмена",
     saveBtn: "Сохранить",
     deleteBtn: "Удалить",
+    profileModalTitle: "Локальный Профиль",
+    nicknameLabel: "Никнейм",
+    weatherTitle: "Местоположение и Погода",
+    configBackupTitle: "Бэкап конфига (JSON)",
+    configBackupDesc: "Экспортируйте ваш конфиг дашборда в файл или восстановите из него.",
+    exportJsonBtn: "Скачать JSON",
+    importJsonBtn: "Загрузить JSON",
+    weatherLoading: "Загрузка погоды...",
+    weatherNotFound: "Город не найден",
+    weatherError: "Ошибка получения погоды",
   },
 };
 
@@ -381,7 +407,7 @@ function applyBgSettings() {
   if (imgBlurWrapper) bg.type === "image" ? imgBlurWrapper.classList.remove("is-hidden") : imgBlurWrapper.classList.add("is-hidden");
 }
 
-// --- Логика виджета часов ---
+// --- Часы ---
 function startClockTimer() {
   if (clockIntervalId) clearInterval(clockIntervalId);
   updateClockDisplay();
@@ -464,7 +490,6 @@ function updateClockDisplay() {
     `;
     content.innerHTML = timeHtml;
   } else {
-    // digital, neon-glow, retro-led
     const timeStr = showSecs ? `${hours}:${mins}:${secs}` : `${hours}:${mins}`;
     let styleClass = "digital-clock";
     if (style === "neon-glow") styleClass += " clock-style-neon";
@@ -613,6 +638,165 @@ function initClockDragAndResize() {
   });
 }
 
+// --- Погода и Локальный Профиль ---
+function getWeatherIconClass(code) {
+  // WMO Weather interpretation codes
+  if (code === 0) return "fa-sun";
+  if (code >= 1 && code <= 3) return "fa-cloud-sun";
+  if (code === 45 || code === 48) return "fa-smog";
+  if (code >= 51 && code <= 67) return "fa-cloud-rain";
+  if (code >= 71 && code <= 77) return "fa-snowflake";
+  if (code >= 80 && code <= 82) return "fa-cloud-showers-heavy";
+  if (code >= 95) return "fa-cloud-bolt";
+  return "fa-cloud";
+}
+
+async function fetchWeather() {
+  const weatherCard = document.getElementById("weather-status");
+  if (!weatherCard) return;
+
+  if (!currentConfig.profile) {
+    currentConfig.profile = { ...defaultConfig.profile };
+  }
+
+  const { lat, lon, location } = currentConfig.profile;
+  const dict = TRANSLATIONS[currentConfig.lang] || TRANSLATIONS.en;
+
+  if (!lat || !lon) {
+    weatherCard.textContent = "Location not set";
+    return;
+  }
+
+  weatherCard.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${dict.weatherLoading}`;
+
+  try {
+    const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+    const data = await res.json();
+
+    if (data && data.current_weather) {
+      const temp = Math.round(data.current_weather.temperature);
+      const iconClass = getWeatherIconClass(data.current_weather.weathercode);
+      
+      weatherCard.innerHTML = `
+        <div class="weather-info-box">
+          <i class="fa-solid ${iconClass} weather-icon"></i>
+          <div class="weather-temp">${temp}°C</div>
+          <div class="weather-city">${location}</div>
+        </div>
+      `;
+    } else {
+      weatherCard.textContent = dict.weatherError;
+    }
+  } catch (err) {
+    console.error("Weather error:", err);
+    weatherCard.textContent = dict.weatherError;
+  }
+}
+
+async function searchAndSetLocation(cityName) {
+  if (!cityName.trim()) return;
+  const dict = TRANSLATIONS[currentConfig.lang] || TRANSLATIONS.en;
+  const weatherCard = document.getElementById("weather-status");
+
+  if (weatherCard) {
+    weatherCard.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${dict.weatherLoading}`;
+  }
+
+  try {
+    const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=en`);
+    const geoData = await geoRes.json();
+
+    if (geoData && geoData.results && geoData.results.length > 0) {
+      const place = geoData.results[0];
+      currentConfig.profile.location = `${place.name}${place.country ? ', ' + place.country : ''}`;
+      currentConfig.profile.lat = place.latitude;
+      currentConfig.profile.lon = place.longitude;
+      saveConfig();
+
+      const locInput = document.getElementById("profile-location-input");
+      if (locInput) locInput.value = currentConfig.profile.location;
+
+      fetchWeather();
+    } else {
+      if (weatherCard) weatherCard.textContent = dict.weatherNotFound;
+    }
+  } catch (err) {
+    console.error("Geocoding error:", err);
+    if (weatherCard) weatherCard.textContent = dict.weatherError;
+  }
+}
+
+function initProfileUI() {
+  if (!currentConfig.profile) {
+    currentConfig.profile = { ...defaultConfig.profile };
+  }
+
+  const nickInput = document.getElementById("profile-nickname-input");
+  const locInput = document.getElementById("profile-location-input");
+
+  if (nickInput) {
+    nickInput.value = currentConfig.profile.nickname || "User";
+    nickInput.addEventListener("change", (e) => {
+      currentConfig.profile.nickname = e.target.value.trim() || "User";
+      saveConfig();
+    });
+  }
+
+  if (locInput) {
+    locInput.value = currentConfig.profile.location || "";
+  }
+
+  const saveLocBtn = document.getElementById("save-location-btn");
+  if (saveLocBtn && locInput) {
+    saveLocBtn.addEventListener("click", () => {
+      searchAndSetLocation(locInput.value);
+    });
+    locInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        searchAndSetLocation(locInput.value);
+      }
+    });
+  }
+
+  // Экспорт JSON
+  const exportBtn = document.getElementById("export-json-btn");
+  if (exportBtn) {
+    exportBtn.addEventListener("click", () => {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentConfig, null, 2));
+      const downloadAnchor = document.createElement("a");
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `dashboard-config-${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    });
+  }
+
+  // Импорт JSON
+  const importInput = document.getElementById("import-json-input");
+  if (importInput) {
+    importInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const imported = JSON.parse(event.target.result);
+          currentConfig = deepMerge(defaultConfig, imported);
+          saveConfig();
+          await initApp();
+          closeProfileModal();
+        } catch (err) {
+          alert("Error importing JSON config! Make sure it is valid JSON.");
+        }
+      };
+      reader.readAsText(file);
+    });
+  }
+}
+
+// --- Язык ---
 function updateLanguage(lang) {
   currentConfig.lang = lang;
   saveConfig();
@@ -644,6 +828,7 @@ function updateLanguage(lang) {
   if (langSelect && langSelect.value !== lang) langSelect.value = lang;
 
   updateClockDisplay();
+  fetchWeather();
 }
 
 function renderHeroCard(container, config) {
@@ -773,6 +958,66 @@ function closeTileEditForm() {
   renderLinksSettingsGrid();
 }
 
+// --- Модалки ---
+const dockbar = document.getElementById("dockbar");
+const settingsModal = document.getElementById("settings-modal");
+const profileModal = document.getElementById("profile-modal");
+const closeSettingsBtn = document.getElementById("close-settings");
+const closeProfileBtn = document.getElementById("close-profile");
+
+function closeSettingsModal() {
+  if (!settingsModal || !settingsModal.open || settingsModal.classList.contains("is-closing")) return;
+
+  closeTileEditForm();
+  settingsModal.classList.add("is-closing");
+
+  let isDone = false;
+  const finishClose = () => {
+    if (isDone) return;
+    isDone = true;
+    settingsModal.removeEventListener("animationend", handleAnimationEnd);
+    settingsModal.classList.remove("is-closing");
+    if (settingsModal.open) {
+      settingsModal.close();
+    }
+  };
+
+  const handleAnimationEnd = (e) => {
+    if (e.target === settingsModal) {
+      finishClose();
+    }
+  };
+
+  settingsModal.addEventListener("animationend", handleAnimationEnd);
+  setTimeout(finishClose, 220);
+}
+
+function closeProfileModal() {
+  if (!profileModal || !profileModal.open || profileModal.classList.contains("is-closing")) return;
+
+  profileModal.classList.add("is-closing");
+
+  let isDone = false;
+  const finishClose = () => {
+    if (isDone) return;
+    isDone = true;
+    profileModal.removeEventListener("animationend", handleAnimationEnd);
+    profileModal.classList.remove("is-closing");
+    if (profileModal.open) {
+      profileModal.close();
+    }
+  };
+
+  const handleAnimationEnd = (e) => {
+    if (e.target === profileModal) {
+      finishClose();
+    }
+  };
+
+  profileModal.addEventListener("animationend", handleAnimationEnd);
+  setTimeout(finishClose, 220);
+}
+
 // --- Инициализация ---
 async function initApp() {
   currentConfig = loadConfig();
@@ -793,11 +1038,13 @@ async function initApp() {
   initClockDragAndResize();
   startClockTimer();
   renderLinksSettingsGrid();
+  initProfileUI();
+  fetchWeather();
 }
 
 initApp();
 
-// --- Переключение цветовых палитр и стилей UI ---
+// --- События UI ---
 const paletteSelect = document.getElementById("palette-select");
 if (paletteSelect) {
   paletteSelect.addEventListener("change", (e) => {
@@ -816,7 +1063,6 @@ if (uiStyleSelect) {
   });
 }
 
-// --- События UI блюра ---
 const blurToggle = document.getElementById("blur-toggle");
 if (blurToggle) {
   blurToggle.addEventListener("change", (e) => {
@@ -843,7 +1089,6 @@ if (blurRange) {
   });
 }
 
-// --- События фона ---
 const bgTypeSelect = document.getElementById("bg-type-select");
 if (bgTypeSelect) {
   bgTypeSelect.addEventListener("change", (e) => {
@@ -935,7 +1180,6 @@ if (bgImgBlurRange) {
   });
 }
 
-// --- События часов ---
 const clockToggle = document.getElementById("clock-toggle");
 if (clockToggle) {
   clockToggle.addEventListener("change", (e) => {
@@ -980,7 +1224,6 @@ if (clockStyleSelect) {
   });
 }
 
-// --- Кнопка "Добавить ссылку" ---
 const addTileBtn = document.getElementById("add-tile-btn");
 if (addTileBtn) {
   addTileBtn.addEventListener("click", () => {
@@ -988,7 +1231,6 @@ if (addTileBtn) {
   });
 }
 
-// --- Обработчики формы плиток ---
 const tileSaveBtn = document.getElementById("tile-save-btn");
 if (tileSaveBtn) {
   tileSaveBtn.addEventListener("click", () => {
@@ -1040,38 +1282,6 @@ if (tileCancelBtn) {
   });
 }
 
-// --- Dockbar и Модалка ---
-const dockbar = document.getElementById("dockbar");
-const settingsModal = document.getElementById("settings-modal");
-const closeSettingsBtn = document.getElementById("close-settings");
-
-function closeSettingsModal() {
-  if (!settingsModal || !settingsModal.open || settingsModal.classList.contains("is-closing")) return;
-
-  closeTileEditForm();
-  settingsModal.classList.add("is-closing");
-
-  let isDone = false;
-  const finishClose = () => {
-    if (isDone) return;
-    isDone = true;
-    settingsModal.removeEventListener("animationend", handleAnimationEnd);
-    settingsModal.classList.remove("is-closing");
-    if (settingsModal.open) {
-      settingsModal.close();
-    }
-  };
-
-  const handleAnimationEnd = (e) => {
-    if (e.target === settingsModal) {
-      finishClose();
-    }
-  };
-
-  settingsModal.addEventListener("animationend", handleAnimationEnd);
-  setTimeout(finishClose, 220);
-}
-
 if (dockbar) {
   dockbar.addEventListener("click", (e) => {
     const btn = e.target.closest(".dock-btn");
@@ -1079,6 +1289,8 @@ if (dockbar) {
 
     if (btn.id === "dock-settings" && settingsModal) {
       settingsModal.showModal();
+    } else if (btn.id === "dock-account" && profileModal) {
+      profileModal.showModal();
     }
   });
 }
@@ -1113,5 +1325,16 @@ if (settingsModal) {
   settingsModal.addEventListener("cancel", (e) => {
     e.preventDefault();
     closeSettingsModal();
+  });
+}
+
+if (profileModal) {
+  if (closeProfileBtn) {
+    closeProfileBtn.addEventListener("click", closeProfileModal);
+  }
+
+  profileModal.addEventListener("cancel", (e) => {
+    e.preventDefault();
+    closeProfileModal();
   });
 }

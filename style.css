@@ -225,6 +225,11 @@
   box-sizing: border-box;
 }
 
+/* Вспомогательный класс утилиты */
+.is-hidden {
+  display: none !important;
+}
+
 /* --- Кастомная полоса прокрутки --- */
 * {
   scrollbar-width: thin;
@@ -497,8 +502,9 @@ body {
   transform: translateX(-1px) scale(0.96);
 }
 
-/* --- 5. Модалка настроек --- */
-#settings-modal {
+/* --- 5. Модальные окна (#settings-modal и #profile-modal) --- */
+#settings-modal,
+#profile-modal {
   display: none;
   width: 90%;
   max-width: 38rem;
@@ -518,16 +524,19 @@ body {
   overflow: hidden;
 }
 
-#settings-modal[open] {
+#settings-modal[open],
+#profile-modal[open] {
   display: flex;
   flex-direction: column;
 }
 
-#settings-modal:not([open]) {
+#settings-modal:not([open]),
+#profile-modal:not([open]) {
   display: none !important;
 }
 
-#settings-modal::backdrop {
+#settings-modal::backdrop,
+#profile-modal::backdrop {
   background: rgba(15, 16, 20, 0.6);
   backdrop-filter: blur(calc(var(--backdrop-blur) * 0.4));
   -webkit-backdrop-filter: blur(calc(var(--backdrop-blur) * 0.4));
@@ -654,6 +663,136 @@ body {
   border: none;
   border-top: 1px solid var(--panel-border);
   margin: 1.25rem 0;
+}
+
+/* --- Стили Погоды (Weather Box) --- */
+.weather-info-box {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 1rem;
+  background: var(--input-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-md);
+  margin-top: 0.5rem;
+  backdrop-filter: blur(var(--backdrop-blur));
+}
+
+.weather-icon {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+}
+
+.weather-temp {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.weather-city {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* --- Стили Локального Профиля (#profile-modal) --- */
+.profile-modal-body {
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.profile-section-card {
+  padding: 1.1rem;
+  background: var(--input-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(var(--backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--backdrop-blur));
+}
+
+.profile-user-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.profile-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: var(--input-focus-bg);
+  border: 1px solid var(--panel-border-hover);
+  color: var(--text-primary);
+  font-size: 1.6rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.profile-info-inputs {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.profile-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.profile-card-title i {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.location-input-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.location-input-group .custom-input {
+  flex: 1;
+}
+
+.weather-card {
+  margin-top: 0.85rem;
+  padding: 0.85rem 1rem;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-sm);
+}
+
+.weather-status-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.config-section .tab-desc {
+  margin-bottom: 0.85rem;
+}
+
+.config-actions-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-full {
+  flex: 1;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.text-center {
+  text-align: center;
 }
 
 /* --- 6. Элементы управления --- */
@@ -910,10 +1049,6 @@ body {
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-.clock-widget.is-hidden {
-  display: none !important;
-}
-
 .clock-widget.is-editing {
   outline: 2px dashed var(--panel-border-hover);
   outline-offset: 12px;
@@ -1067,10 +1202,6 @@ body {
   opacity: 0.85;
 }
 
-.analog-hand.second.is-hidden {
-  display: none !important;
-}
-
 /* Маркер масштабирования часов */
 .clock-resize-handle {
   display: none;
@@ -1119,10 +1250,6 @@ body {
   font-size: 0.875rem;
   color: var(--text-primary);
   animation: modal-show 0.2s ease forwards;
-}
-
-.clock-edit-bar.is-hidden {
-  display: none !important;
 }
 
 body.clock-edit-mode #dashboard,
@@ -1187,10 +1314,6 @@ body.clock-edit-mode #dockbar {
   border: 1px solid var(--panel-border);
   border-radius: var(--radius-md);
   margin-top: 0.75rem;
-}
-
-.tile-edit-card-form.is-hidden {
-  display: none;
 }
 
 .tile-edit-card-form h4 {
@@ -1281,7 +1404,8 @@ body.clock-edit-mode #dockbar {
 [data-ui-style="soft-matte"] .hero-card,
 [data-ui-style="soft-matte"] .dockbar,
 [data-ui-style="soft-matte"] .clock-edit-bar,
-[data-ui-style="soft-matte"] #settings-modal {
+[data-ui-style="soft-matte"] #settings-modal,
+[data-ui-style="soft-matte"] #profile-modal {
   border: 1.5px solid var(--panel-border-hover);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
 }
@@ -1322,7 +1446,8 @@ body.clock-edit-mode #dockbar {
 [data-ui-style="minimal"] .hero-card,
 [data-ui-style="minimal"] .dockbar,
 [data-ui-style="minimal"] .clock-edit-bar,
-[data-ui-style="minimal"] #settings-modal {
+[data-ui-style="minimal"] #settings-modal,
+[data-ui-style="minimal"] #profile-modal {
   box-shadow: none;
   border: 1px solid var(--panel-border);
   backdrop-filter: none !important;
@@ -1369,7 +1494,8 @@ body.clock-edit-mode #dockbar {
     transform: translateY(-3px);
   }
 
-  #settings-modal {
+  #settings-modal,
+  #profile-modal {
     padding: 1rem;
     max-height: 92vh;
   }
@@ -1395,21 +1521,29 @@ body.clock-edit-mode #dockbar {
     justify-content: center;
     white-space: nowrap;
   }
+
+  .config-actions-row {
+    flex-direction: column;
+  }
 }
 
-#settings-modal[open] {
+#settings-modal[open],
+#profile-modal[open] {
   animation: modal-show 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-#settings-modal.is-closing {
+#settings-modal.is-closing,
+#profile-modal.is-closing {
   animation: modal-hide 0.18s cubic-bezier(0.7, 0, 0.84, 0) forwards;
 }
 
-#settings-modal[open]::backdrop {
+#settings-modal[open]::backdrop,
+#profile-modal[open]::backdrop {
   animation: backdrop-show 0.2s ease forwards;
 }
 
-#settings-modal.is-closing::backdrop {
+#settings-modal.is-closing::backdrop,
+#profile-modal.is-closing::backdrop {
   animation: backdrop-hide 0.18s ease forwards;
 }
 

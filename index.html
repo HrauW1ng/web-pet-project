@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+    <!-- Favicon / Logo -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -28,15 +31,17 @@
         </button>
     </div>
 
+    <!-- Докбар -->
     <aside id="dockbar" class="dockbar" aria-label="Quick Dock">
         <button class="dock-btn" id="dock-settings" title="Settings" data-i18n-title="dockSettings">
             <i class="fa-solid fa-gear"></i>
         </button>
-        <button class="dock-btn" id="dock-account" title="Account" data-i18n-title="dockAccount">
-            <i class="fa-solid fa-user-large"></i>
+        <button class="dock-btn" id="dock-account" title="Profile" data-i18n-title="dockProfile">
+            <i class="fa-solid fa-user-gear"></i>
         </button>
     </aside>
 
+    <!-- Модальное окно Настроек -->
     <dialog id="settings-modal" class="modal">
         <div class="modal-header">
             <h2 data-i18n="modalTitle">Settings</h2>
@@ -61,7 +66,6 @@
             </nav>
             <div class="settings-content">
                 <section id="tab-customization" class="tab-pane active">
-                    <!-- Выбор цветовой палитры -->
                     <div class="setting-item">
                         <span class="setting-label" data-i18n="paletteLabel">Color Palette</span>
                         <div class="select-wrapper">
@@ -86,7 +90,6 @@
                         </div>
                     </div>
 
-                    <!-- Выбор стиля контура и рамок -->
                     <div class="setting-item">
                         <span class="setting-label" data-i18n="uiStyleLabel">Frame & Contour Style</span>
                         <div class="select-wrapper">
@@ -99,7 +102,6 @@
                         </div>
                     </div>
 
-                    <!-- Переключатель блюра UI элементов -->
                     <div class="setting-item">
                         <span class="setting-label" data-i18n="blurEnableLabel">UI Blur Effect</span>
                         <label class="toggle-switch">
@@ -108,7 +110,6 @@
                         </label>
                     </div>
 
-                    <!-- Регулятор интенсивности блюра UI -->
                     <div id="blur-slider-wrapper" class="setting-item sub-setting">
                         <div class="setting-label-group">
                             <span class="setting-label" data-i18n="blurAmountLabel">UI Blur Intensity</span>
@@ -117,7 +118,6 @@
                         <input type="range" id="blur-range" min="0" max="25" value="10" class="custom-range">
                     </div>
 
-                    <!-- Выбор типа фона -->
                     <div class="setting-item">
                         <span class="setting-label" data-i18n="bgTypeLabel">Background</span>
                         <div class="select-wrapper">
@@ -130,7 +130,6 @@
                         </div>
                     </div>
 
-                    <!-- Под-блок выбора 3 цветов градиента -->
                     <div id="bg-gradient-wrapper" class="setting-item sub-setting is-hidden">
                         <div class="setting-label-group">
                             <span class="setting-label" data-i18n="bgGradientLabel">3-Color Gradient</span>
@@ -142,7 +141,6 @@
                         </div>
                     </div>
 
-                    <!-- Под-блок выбора монотонного цвета -->
                     <div id="bg-color-wrapper" class="setting-item sub-setting is-hidden">
                         <div class="setting-label-group">
                             <span class="setting-label" data-i18n="bgColorLabel">Color</span>
@@ -150,7 +148,6 @@
                         </div>
                     </div>
 
-                    <!-- Под-блок выбора файла изображения -->
                     <div id="bg-image-wrapper" class="setting-item sub-setting is-hidden">
                         <div class="setting-label-group">
                             <span class="setting-label" data-i18n="bgImageLabel">Upload Image</span>
@@ -162,7 +159,6 @@
                         </div>
                     </div>
 
-                    <!-- Регулятор размытия фонового изображения -->
                     <div id="bg-img-blur-wrapper" class="setting-item sub-setting is-hidden">
                         <div class="setting-label-group">
                             <span class="setting-label" data-i18n="bgImgBlurLabel">Image Blur</span>
@@ -174,7 +170,6 @@
 
                 <section id="tab-widgets" class="tab-pane">
                     <div class="widgets-section">
-                        <!-- Секция Виджет часов -->
                         <div class="widgets-section-header">
                             <div>
                                 <h3 data-i18n="clockTitle">Clock Widget</h3>
@@ -190,7 +185,6 @@
                             </label>
                         </div>
 
-                        <!-- Под-настройки часов (появляются только при включенных часах) -->
                         <div id="clock-sub-settings" class="sub-setting-group is-hidden">
                             <div class="setting-item sub-setting-item">
                                 <span class="setting-label" data-i18n="clockSecondsLabel">Show Seconds</span>
@@ -231,7 +225,6 @@
 
                         <hr class="section-divider">
 
-                        <!-- Секция Быстрые ссылки -->
                         <div class="widgets-section-header">
                             <div>
                                 <h3 data-i18n="quickLinksTitle">Quick Links</h3>
@@ -243,10 +236,8 @@
                             </button>
                         </div>
                         
-                        <!-- Сетка текущих плиток -->
                         <div id="links-settings-grid" class="links-settings-grid"></div>
                 
-                        <!-- Форма создания/редактирования плитки -->
                         <div id="tile-edit-form" class="tile-edit-card-form is-hidden">
                             <h4 id="tile-form-title" data-i18n="editTileTitle">Edit Tile</h4>
                             <div class="setting-item sub-setting">
@@ -278,6 +269,68 @@
                         </div>
                     </div>
                 </section>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- Модальное окно Локального Профиля -->
+    <dialog id="profile-modal" class="modal">
+        <div class="modal-header">
+            <h2 data-i18n="profileModalTitle">Local Profile</h2>
+            <button id="close-profile" class="close-btn" title="Close" data-i18n-title="closeBtn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="modal-body profile-modal-body">
+            <!-- Блок профиля -->
+            <div class="profile-section-card profile-user-card">
+                <div class="profile-avatar">
+                    <i class="fa-solid fa-user-astronaut"></i>
+                </div>
+                <div class="profile-info-inputs">
+                    <label class="setting-label" for="profile-nickname-input" data-i18n="nicknameLabel">Nickname</label>
+                    <input type="text" id="profile-nickname-input" class="custom-input" placeholder="User">
+                </div>
+            </div>
+
+            <!-- Блок Погоды -->
+            <div class="profile-section-card weather-section">
+                <div class="profile-card-title">
+                    <i class="fa-solid fa-cloud-sun"></i>
+                    <span data-i18n="weatherTitle">Location & Weather</span>
+                </div>
+                <div class="location-input-group">
+                    <input type="text" id="profile-location-input" class="custom-input" placeholder="City (e.g. London)">
+                    <button type="button" id="save-location-btn" class="btn btn-primary" title="Search">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </div>
+
+                <div id="weather-card" class="weather-card">
+                    <div id="weather-status" class="weather-status-text">Set location to load weather</div>
+                </div>
+            </div>
+
+            <!-- Блок Экспорта / Импорта JSON -->
+            <div class="profile-section-card config-section">
+                <div class="profile-card-title">
+                    <i class="fa-solid fa-file-code"></i>
+                    <span data-i18n="configBackupTitle">Config Backup (JSON)</span>
+                </div>
+                <p class="tab-desc" data-i18n="configBackupDesc">Export your dashboard configuration or restore it from a file.</p>
+                
+                <div class="config-actions-row">
+                    <button type="button" id="export-json-btn" class="btn btn-secondary btn-full">
+                        <i class="fa-solid fa-download"></i>
+                        <span data-i18n="exportJsonBtn">Export JSON</span>
+                    </button>
+                    
+                    <label class="custom-file-btn btn-full text-center">
+                        <input type="file" id="import-json-input" accept=".json" hidden>
+                        <i class="fa-solid fa-upload"></i>
+                        <span data-i18n="importJsonBtn">Import JSON</span>
+                    </label>
+                </div>
             </div>
         </div>
     </dialog>
