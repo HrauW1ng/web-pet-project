@@ -886,10 +886,25 @@ function renderHeroCard(container, config) {
 
   container.append(card);
 
-  // Принудительная установка фокуса
-  requestAnimationFrame(() => {
+// Надежный фокус для HTTPS / GitHub Pages
+const doFocus = () => {
+  setTimeout(() => {
     input.focus();
-  });
+    // Выделяем текст, если там что-то случайно ввелось
+    input.select(); 
+  }, 100);
+};
+
+if (document.readyState === "complete") {
+  doFocus();
+} else {
+  window.addEventListener("load", doFocus, { once: true });
+}
+
+// Подстраховка: если юзер переключился на вкладку чуть позже
+if (!document.hasFocus()) {
+  window.addEventListener("focus", doFocus, { once: true });
+}
 }
 
 function renderLinksSettingsGrid() {
