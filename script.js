@@ -640,7 +640,6 @@ function initClockDragAndResize() {
 
 // --- Погода и Локальный Профиль ---
 function getWeatherIconClass(code) {
-  // WMO Weather interpretation codes
   if (code === 0) return "fa-sun";
   if (code >= 1 && code <= 3) return "fa-cloud-sun";
   if (code === 45 || code === 48) return "fa-smog";
@@ -848,6 +847,7 @@ function renderHeroCard(container, config) {
   input.placeholder = config.search.placeholder;
   input.autocomplete = "off";
   input.required = true;
+  input.autofocus = true; // Автофокус HTML
 
   form.append(input);
   form.addEventListener("submit", (e) => {
@@ -885,6 +885,11 @@ function renderHeroCard(container, config) {
   }
 
   container.append(card);
+
+  // Принудительная установка фокуса
+  requestAnimationFrame(() => {
+    input.focus();
+  });
 }
 
 function renderLinksSettingsGrid() {
