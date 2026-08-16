@@ -20,6 +20,11 @@
   --radius-lg: 1rem;
   --radius-md: 0.5rem;
   --radius-sm: 0.35rem;
+
+  --clock-scale: 1;
+  --clock-color: #ffffff;
+  --weather-scale: 1;
+  --weather-color: #ffffff;
 }
 
 /* --- Цветовые палитры --- */
@@ -665,7 +670,7 @@ body {
   margin: 1.25rem 0;
 }
 
-/* --- Стили Погоды (Weather Box) --- */
+/* --- Стили Погоды (Weather Box в профиле) --- */
 .weather-info-box {
   display: flex;
   align-items: center;
@@ -1084,8 +1089,6 @@ body {
   letter-spacing: 0.5px;
 }
 
-/* --- Различные варианты стилей часов --- */
-
 /* 1. Digital Cards Style */
 .clock-card-style .card-digits-wrapper {
   display: flex;
@@ -1230,7 +1233,7 @@ body {
   display: flex;
 }
 
-/* Верхняя плашка режима редактирования */
+/* Верхняя плашка режима редактирования часов */
 .clock-edit-bar {
   position: fixed;
   top: 1.5rem;
@@ -1259,7 +1262,182 @@ body.clock-edit-mode #dockbar {
   transition: opacity 0.2s ease;
 }
 
-/* Плитки ссылок */
+/* --- 8. Отдельный плавающий Виджет Погоды --- */
+.weather-widget {
+  position: fixed;
+  left: 50%;
+  top: 38%;
+  transform: translate(-50%, -50%) scale(var(--weather-scale, 1));
+  transform-origin: center center;
+  z-index: 10;
+  user-select: none;
+  color: var(--weather-color, #ffffff);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.weather-widget.is-editing {
+  outline: 2px dashed var(--panel-border-hover);
+  outline-offset: 12px;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  cursor: move;
+}
+
+.weather-resize-handle {
+  display: none;
+  position: absolute;
+  bottom: -18px;
+  right: -18px;
+  width: 28px;
+  height: 28px;
+  background: var(--input-focus-bg);
+  border: 1px solid var(--panel-border-hover);
+  border-radius: 50%;
+  color: var(--text-primary);
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  cursor: se-resize;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease;
+}
+
+.weather-resize-handle:hover {
+  transform: scale(1.15);
+}
+
+.weather-widget.is-editing .weather-resize-handle {
+  display: flex;
+}
+
+/* Верхняя плашка режима редактирования погоды */
+.weather-edit-bar {
+  position: fixed;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.65rem 1.25rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border-hover);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(var(--backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--backdrop-blur));
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  animation: modal-show 0.2s ease forwards;
+}
+
+body.weather-edit-mode #dashboard,
+body.weather-edit-mode #dockbar {
+  pointer-events: none;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+/* Варианты стилей плавающего виджета погоды */
+/* 1. Glass Card Style */
+.weather-style-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.85rem 1.5rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(var(--backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--backdrop-blur));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.weather-style-card .weather-icon-lg {
+  font-size: 2.2rem;
+  color: currentColor;
+}
+
+.weather-style-card .weather-info-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.weather-style-card .weather-temp-lg {
+  font-size: 1.8rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.weather-style-card .weather-city-sub {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+/* 2. Compact Minimal Style */
+.weather-style-minimal {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.35rem;
+  font-weight: 500;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* 3. Cyber Neon Style */
+.weather-style-neon {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.65rem 1.25rem;
+  font-family: 'Courier New', Courier, monospace;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-md);
+  text-shadow: 0 0 10px currentColor;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.6);
+}
+
+.weather-style-neon .weather-temp-lg {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* 4. Detailed Badge Style */
+.weather-style-detailed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1rem 1.25rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(var(--backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--backdrop-blur));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.weather-style-detailed .weather-main-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.weather-style-detailed .weather-details-grid {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.78rem;
+  opacity: 0.85;
+  border-top: 1px solid var(--panel-border);
+  padding-top: 0.4rem;
+  margin-top: 0.2rem;
+}
+
+/* --- 9. Управление плитками и формами --- */
 .links-settings-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -1307,7 +1485,6 @@ body.clock-edit-mode #dockbar {
   box-shadow: 0 0 0 2px var(--accent-color);
 }
 
-/* Форма плитки */
 .tile-edit-card-form {
   padding: 0.85rem 1rem;
   background: rgba(0, 0, 0, 0.22);
@@ -1398,12 +1575,13 @@ body.clock-edit-mode #dockbar {
   color: #ffffff;
 }
 
-/* --- 8. Стили контура и рамок (UI Styles) --- */
+/* --- 10. Стили контура и рамок (UI Styles) --- */
 
 /* Style 2: Soft Matte (Solid Outline) */
 [data-ui-style="soft-matte"] .hero-card,
 [data-ui-style="soft-matte"] .dockbar,
 [data-ui-style="soft-matte"] .clock-edit-bar,
+[data-ui-style="soft-matte"] .weather-edit-bar,
 [data-ui-style="soft-matte"] #settings-modal,
 [data-ui-style="soft-matte"] #profile-modal {
   border: 1.5px solid var(--panel-border-hover);
@@ -1446,6 +1624,7 @@ body.clock-edit-mode #dockbar {
 [data-ui-style="minimal"] .hero-card,
 [data-ui-style="minimal"] .dockbar,
 [data-ui-style="minimal"] .clock-edit-bar,
+[data-ui-style="minimal"] .weather-edit-bar,
 [data-ui-style="minimal"] #settings-modal,
 [data-ui-style="minimal"] #profile-modal {
   box-shadow: none;
@@ -1480,7 +1659,7 @@ body.clock-edit-mode #dockbar {
   transform: none;
 }
 
-/* --- 9. Адаптивность и Анимации --- */
+/* --- 11. Адаптивность и Анимации --- */
 @media (max-width: 640px), (max-height: 600px) {
   .dockbar {
     top: auto;

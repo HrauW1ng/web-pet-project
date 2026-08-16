@@ -31,6 +31,23 @@
         </button>
     </div>
 
+    <!-- Виджет погоды -->
+    <div id="weather-widget" class="weather-widget is-hidden" aria-label="Weather Widget">
+        <div class="weather-widget-content"></div>
+        <div id="weather-resize-handle" class="weather-resize-handle" title="Resize">
+            <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+        </div>
+    </div>
+
+    <!-- Верхняя панель управления в режиме редактирования погоды -->
+    <div id="weather-edit-bar" class="weather-edit-bar is-hidden">
+        <span data-i18n="weatherEditingNotice">Drag weather to move. Use corner handle to resize.</span>
+        <button type="button" id="weather-save-pos-btn" class="btn btn-primary">
+            <i class="fa-solid fa-check"></i>
+            <span data-i18n="weatherDoneBtn">Done</span>
+        </button>
+    </div>
+
     <!-- Докбар -->
     <aside id="dockbar" class="dockbar" aria-label="Quick Dock">
         <button class="dock-btn" id="dock-settings" title="Settings" data-i18n-title="dockSettings">
@@ -170,6 +187,7 @@
 
                 <section id="tab-widgets" class="tab-pane">
                     <div class="widgets-section">
+                        <!-- Секция Часов -->
                         <div class="widgets-section-header">
                             <div>
                                 <h3 data-i18n="clockTitle">Clock Widget</h3>
@@ -225,6 +243,53 @@
 
                         <hr class="section-divider">
 
+                        <!-- Секция Погоды -->
+                        <div class="widgets-section-header">
+                            <div>
+                                <h3 data-i18n="weatherWidgetTitle">Weather Widget</h3>
+                                <p class="tab-desc" data-i18n="weatherWidgetDesc">Display customizable weather widget on your dashboard.</p>
+                            </div>
+                        </div>
+
+                        <div class="setting-item">
+                            <span class="setting-label" data-i18n="weatherEnableLabel">Weather Widget</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="weather-toggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div id="weather-sub-settings" class="sub-setting-group is-hidden">
+                            <div class="setting-item sub-setting-item">
+                                <span class="setting-label" data-i18n="weatherColorLabel">Widget Color</span>
+                                <input type="color" id="weather-color-picker" class="custom-color-picker" value="#ffffff">
+                            </div>
+
+                            <div class="setting-item sub-setting-item">
+                                <span class="setting-label" data-i18n="weatherStyleLabel">Weather Style</span>
+                                <div class="select-wrapper">
+                                    <select id="weather-style-select" class="custom-select" aria-label="Weather Style">
+                                        <option value="card" data-i18n="weatherStyleCard">1 стиль</option>
+                                        <option value="minimal" data-i18n="weatherStyleMinimal">2 стиль</option>
+                                        <option value="neon" data-i18n="weatherStyleNeon">3 стиль</option>
+                                        <option value="detailed" data-i18n="weatherStyleDetailed">4 стиль</option>
+                                    </select>
+                                    <i class="fa-solid fa-chevron-down select-icon"></i>
+                                </div>
+                            </div>
+
+                            <div class="setting-item sub-setting-item">
+                                <span class="setting-label" data-i18n="weatherPositionLabel">Position & Size</span>
+                                <button type="button" id="weather-edit-pos-btn" class="btn btn-secondary">
+                                    <i class="fa-solid fa-up-down-left-right"></i>
+                                    <span data-i18n="weatherEditPosBtn">Move & Resize</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <hr class="section-divider">
+
+                        <!-- Секция Быстрых Ссылок -->
                         <div class="widgets-section-header">
                             <div>
                                 <h3 data-i18n="quickLinksTitle">Quick Links</h3>

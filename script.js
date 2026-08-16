@@ -27,6 +27,14 @@ const defaultConfig = {
     y: 22,
     size: 100,
   },
+  weather: {
+    enabled: false,
+    color: "#ffffff",
+    style: "card",
+    x: 50,
+    y: 38,
+    size: 100,
+  },
   profile: {
     nickname: "User",
     location: "Kyiv",
@@ -98,6 +106,19 @@ const TRANSLATIONS = {
     clockEditPosBtn: "Move & Resize Widget",
     clockEditingNotice: "Drag clock to move. Use corner handle to resize.",
     clockDoneBtn: "Done",
+    weatherWidgetTitle: "Weather Widget",
+    weatherWidgetDesc: "Display customizable weather on your dashboard.",
+    weatherEnableLabel: "Enable Weather Widget",
+    weatherColorLabel: "Widget Text Color",
+    weatherStyleLabel: "Weather Style",
+    weatherStyleCard: "Style 1",
+    weatherStyleMinimal: "Style 2",
+    weatherStyleNeon: "Style 3",
+    weatherStyleDetailed: "Style 4",
+    weatherPositionLabel: "Position & Size",
+    weatherEditPosBtn: "Move & Resize Widget",
+    weatherEditingNotice: "Drag weather to move. Use corner handle to resize.",
+    weatherDoneBtn: "Done",
     languageLabel: "Language",
     searchPlaceholder: "Search the web…",
     quickLinksTitle: "Quick Links",
@@ -179,6 +200,19 @@ const TRANSLATIONS = {
     clockEditPosBtn: "Переместить и изменить размер",
     clockEditingNotice: "Зажмите и тяните часы для перемещения. Используйте уголок для размера.",
     clockDoneBtn: "Готово",
+    weatherWidgetTitle: "Виджет погоды",
+    weatherWidgetDesc: "Отображение настраиваемой погоды на рабочем столе.",
+    weatherEnableLabel: "Включить погоду",
+    weatherColorLabel: "Цвет виджета",
+    weatherStyleLabel: "Стиль погоды",
+    weatherStyleCard: "1 стиль",
+    weatherStyleMinimal: "2 стиль",
+    weatherStyleNeon: "3 стиль",
+    weatherStyleDetailed: "4 стиль",
+    weatherPositionLabel: "Позиция и размер",
+    weatherEditPosBtn: "Переместить и изменить размер",
+    weatherEditingNotice: "Зажмите и тяните погоду для перемещения. Используйте уголок для размера.",
+    weatherDoneBtn: "Готово",
     languageLabel: "Язык",
     searchPlaceholder: "Поиск в сети…",
     quickLinksTitle: "Быстрые ссылки",
@@ -209,6 +243,7 @@ let currentConfig = structuredClone(defaultConfig);
 let selectedTileIndex = null;
 let rafId = null;
 let clockIntervalId = null;
+let cachedWeatherData = null;
 
 // --- Helper IndexedDB ---
 function openIDB() {
@@ -638,21 +673,23 @@ function initClockDragAndResize() {
   });
 }
 
-// --- Погода и Локальный Профиль ---
-function getWeatherIconClass(code) {
-  if (code === 0) return "fa-sun";
-  if (code >= 1 && code <= 3) return "fa-cloud-sun";
-  if (code === 45 || code === 48) return "fa-smog";
-  if (code >= 51 && code <= 67) return "fa-cloud-rain";
-  if (code >= 71 && code <= 77) return "fa-snowflake";
-  if (code >= 80 && code <= 82) return "fa-cloud-showers-heavy";
-  if (code >= 95) return "fa-cloud-bolt";
-  return "fa-cloud";
+// --- Погода и Виджет Погоды ---
+function getWeatherInfo(code, lang) {
+  const isRu = lang === "ru";
+  if (code === 0) return { icon: "fa-sun", text: isRu ? "Ясно" : "Clear" };
+  if (code >= 1 && code <= 3) return { icon: "fa-cloud-sun", text: isRu ? "Облачно" : "Cloudy" };
+  if (code === 45 || code === 48) return { icon: "fa-smog", text: isRu ? "Туман" : "Fog" };
+  if (code >= 51 && code <= 57) return { icon: "fa-cloud-rain", text: isRu ? "Морось" : "Drizzle" };
+  if (code >= 61 && code <= 67) return { icon: "fa-cloud-showers-heavy", text: isRu ? "Дождь" : "Rain" };
+  if (code >= 71 && code <= 77) return { icon: "fa-snowflake", text: isRu ? "Снег" : "Snow" };
+  if (code >= 80 && code <= 82) return { icon: "fa-cloud-showers-water", text: isRu ? "Ливень" : "Showers" };
+  if (code >= 85 && code <= 86) return { icon: "fa-snowflake", text: isRu ? "Снегопад" : "Snowfall" };
+  if (code >= 95) return { icon: "fa-cloud-bolt", text: isRu ? "Гроза" : "Thunderstorm" };
+  return { icon: "fa-cloud", text: isRu ? "Пасмурно" : "Overcast" };
 }
 
 async function fetchWeather() {
   const weatherCard = document.getElementById("weather-status");
-  if (!weatherCard) return;
 
   if (!currentConfig.profile) {
     currentConfig.profile = { ...defaultConfig.profile };
@@ -662,34 +699,249 @@ async function fetchWeather() {
   const dict = TRANSLATIONS[currentConfig.lang] || TRANSLATIONS.en;
 
   if (!lat || !lon) {
-    weatherCard.textContent = "Location not set";
+    if (weatherCard) weatherCard.textContent = "Location not set";
+    cachedWeatherData = null;
+    updateWeatherWidgetDisplay();
     return;
   }
 
-  weatherCard.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${dict.weatherLoading}`;
+  if (weatherCard) {
+    weatherCard.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${dict.weatherLoading}`;
+  }
 
   try {
     const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
     const data = await res.json();
 
     if (data && data.current_weather) {
+      cachedWeatherData = data.current_weather;
       const temp = Math.round(data.current_weather.temperature);
-      const iconClass = getWeatherIconClass(data.current_weather.weathercode);
+      const info = getWeatherInfo(data.current_weather.weathercode, currentConfig.lang);
       
-      weatherCard.innerHTML = `
-        <div class="weather-info-box">
-          <i class="fa-solid ${iconClass} weather-icon"></i>
-          <div class="weather-temp">${temp}°C</div>
-          <div class="weather-city">${location}</div>
-        </div>
-      `;
+      if (weatherCard) {
+        weatherCard.innerHTML = `
+          <div class="weather-info-box">
+            <i class="fa-solid ${info.icon} weather-icon"></i>
+            <div class="weather-temp">${temp}°C</div>
+            <div class="weather-city">${location}</div>
+          </div>
+        `;
+      }
     } else {
-      weatherCard.textContent = dict.weatherError;
+      cachedWeatherData = null;
+      if (weatherCard) weatherCard.textContent = dict.weatherError;
     }
   } catch (err) {
     console.error("Weather error:", err);
-    weatherCard.textContent = dict.weatherError;
+    cachedWeatherData = null;
+    if (weatherCard) weatherCard.textContent = dict.weatherError;
   }
+
+  updateWeatherWidgetDisplay();
+}
+
+function updateWeatherWidgetDisplay() {
+  if (!currentConfig.weather || !currentConfig.weather.enabled) return;
+  const weatherEl = document.getElementById("weather-widget");
+  if (!weatherEl) return;
+
+  const content = weatherEl.querySelector(".weather-widget-content");
+  if (!content) return;
+
+  const dict = TRANSLATIONS[currentConfig.lang] || TRANSLATIONS.en;
+  const location = currentConfig.profile ? currentConfig.profile.location : "Kyiv";
+
+  if (!cachedWeatherData) {
+    content.innerHTML = `<div class="weather-widget-fallback"><i class="fa-solid fa-cloud"></i> <span>${dict.weatherLoading}</span></div>`;
+    return;
+  }
+
+  const temp = Math.round(cachedWeatherData.temperature);
+  const wind = Math.round(cachedWeatherData.windspeed);
+  const info = getWeatherInfo(cachedWeatherData.weathercode, currentConfig.lang);
+  const style = currentConfig.weather.style || "card";
+
+  if (style === "minimal") {
+    content.innerHTML = `
+      <div class="weather-ww-minimal">
+        <i class="fa-solid ${info.icon}"></i>
+        <span class="ww-temp">${temp}°C</span>
+        <span class="ww-city">${location}</span>
+      </div>
+    `;
+  } else if (style === "neon") {
+    content.innerHTML = `
+      <div class="weather-ww-neon">
+        <div class="ww-neon-top">
+          <i class="fa-solid ${info.icon}"></i>
+          <span class="ww-temp">${temp}°C</span>
+        </div>
+        <div class="ww-neon-bottom">
+          <span class="ww-city">${location}</span>
+          <span class="ww-cond">${info.text}</span>
+        </div>
+      </div>
+    `;
+  } else if (style === "detailed") {
+    content.innerHTML = `
+      <div class="weather-ww-detailed">
+        <div class="ww-det-header">
+          <span class="ww-city">${location}</span>
+          <span class="ww-cond">${info.text}</span>
+        </div>
+        <div class="ww-det-body">
+          <i class="fa-solid ${info.icon} ww-det-icon"></i>
+          <span class="ww-temp">${temp}°C</span>
+        </div>
+        <div class="ww-det-footer">
+          <span><i class="fa-solid fa-wind"></i> ${wind} km/h</span>
+        </div>
+      </div>
+    `;
+  } else {
+    // Default: 'card'
+    content.innerHTML = `
+      <div class="weather-ww-card">
+        <div class="ww-card-main">
+          <i class="fa-solid ${info.icon} ww-card-icon"></i>
+          <div class="ww-card-temp">${temp}°C</div>
+        </div>
+        <div class="ww-card-sub">
+          <div class="ww-card-city">${location}</div>
+          <div class="ww-card-desc">${info.text}</div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function applyWeatherSettings() {
+  if (!currentConfig.weather) currentConfig.weather = { ...defaultConfig.weather };
+  const w = currentConfig.weather;
+
+  const weatherEl = document.getElementById("weather-widget");
+  const toggle = document.getElementById("weather-toggle");
+  const subSettings = document.getElementById("weather-sub-settings");
+  const colorPicker = document.getElementById("weather-color-picker");
+  const styleSelect = document.getElementById("weather-style-select");
+
+  if (toggle) toggle.checked = !!w.enabled;
+  if (colorPicker) colorPicker.value = w.color || "#ffffff";
+  if (styleSelect) styleSelect.value = w.style || "card";
+
+  if (subSettings) {
+    if (w.enabled) {
+      subSettings.classList.remove("is-hidden");
+    } else {
+      subSettings.classList.add("is-hidden");
+    }
+  }
+
+  if (weatherEl) {
+    if (w.enabled) {
+      weatherEl.classList.remove("is-hidden");
+    } else {
+      weatherEl.classList.add("is-hidden");
+    }
+
+    weatherEl.style.left = `${w.x !== undefined ? w.x : 50}%`;
+    weatherEl.style.top = `${w.y !== undefined ? w.y : 38}%`;
+    weatherEl.style.setProperty("--weather-color", w.color || "#ffffff");
+    weatherEl.style.setProperty("--weather-scale", (w.size || 100) / 100);
+  }
+
+  updateWeatherWidgetDisplay();
+}
+
+function initWeatherDragAndResize() {
+  const weatherEl = document.getElementById("weather-widget");
+  const handle = document.getElementById("weather-resize-handle");
+  const editBtn = document.getElementById("weather-edit-pos-btn");
+  const saveBtn = document.getElementById("weather-save-pos-btn");
+  const editBar = document.getElementById("weather-edit-bar");
+
+  if (!weatherEl) return;
+
+  let isDragging = false;
+  let isResizing = false;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+  let startResizeX = 0;
+  let startResizeScale = 100;
+
+  function enterEditMode() {
+    closeSettingsModal();
+    document.body.classList.add("weather-edit-mode");
+    weatherEl.classList.add("is-editing");
+    if (editBar) editBar.classList.remove("is-hidden");
+  }
+
+  function exitEditMode() {
+    document.body.classList.remove("weather-edit-mode");
+    weatherEl.classList.remove("is-editing");
+    if (editBar) editBar.classList.add("is-hidden");
+    saveConfig();
+  }
+
+  if (editBtn) editBtn.addEventListener("click", enterEditMode);
+  if (saveBtn) saveBtn.addEventListener("click", exitEditMode);
+
+  weatherEl.addEventListener("mousedown", (e) => {
+    if (!weatherEl.classList.contains("is-editing")) return;
+    if (e.target.closest("#weather-resize-handle")) return;
+
+    isDragging = true;
+    const mouseX = (e.clientX / window.innerWidth) * 100;
+    const mouseY = (e.clientY / window.innerHeight) * 100;
+
+    dragOffsetX = mouseX - (currentConfig.weather.x || 50);
+    dragOffsetY = mouseY - (currentConfig.weather.y || 38);
+
+    e.preventDefault();
+  });
+
+  if (handle) {
+    handle.addEventListener("mousedown", (e) => {
+      if (!weatherEl.classList.contains("is-editing")) return;
+
+      isResizing = true;
+      startResizeX = e.clientX;
+      startResizeScale = currentConfig.weather.size || 100;
+
+      e.preventDefault();
+      e.stopPropagation();
+    });
+  }
+
+  window.addEventListener("mousemove", (e) => {
+    if (isDragging) {
+      const mouseX = (e.clientX / window.innerWidth) * 100;
+      const mouseY = (e.clientY / window.innerHeight) * 100;
+
+      let newX = Math.max(5, Math.min(95, mouseX - dragOffsetX));
+      let newY = Math.max(5, Math.min(95, mouseY - dragOffsetY));
+
+      currentConfig.weather.x = newX;
+      currentConfig.weather.y = newY;
+
+      weatherEl.style.left = `${newX}%`;
+      weatherEl.style.top = `${newY}%`;
+    } else if (isResizing) {
+      const deltaX = e.clientX - startResizeX;
+      let newSize = Math.max(50, Math.min(250, startResizeScale + deltaX * 0.5));
+
+      currentConfig.weather.size = newSize;
+      weatherEl.style.setProperty("--weather-scale", newSize / 100);
+    }
+  });
+
+  window.addEventListener("mouseup", () => {
+    if (isDragging || isResizing) {
+      isDragging = false;
+      isResizing = false;
+      saveConfig();
+    }
+  });
 }
 
 async function searchAndSetLocation(cityName) {
@@ -847,7 +1099,7 @@ function renderHeroCard(container, config) {
   input.placeholder = config.search.placeholder;
   input.autocomplete = "off";
   input.required = true;
-  input.autofocus = true; // Автофокус HTML
+  input.autofocus = true;
 
   form.append(input);
   form.addEventListener("submit", (e) => {
@@ -886,25 +1138,22 @@ function renderHeroCard(container, config) {
 
   container.append(card);
 
-// Надежный фокус для HTTPS / GitHub Pages
-const doFocus = () => {
-  setTimeout(() => {
-    input.focus();
-    // Выделяем текст, если там что-то случайно ввелось
-    input.select(); 
-  }, 100);
-};
+  const doFocus = () => {
+    setTimeout(() => {
+      input.focus();
+      input.select(); 
+    }, 100);
+  };
 
-if (document.readyState === "complete") {
-  doFocus();
-} else {
-  window.addEventListener("load", doFocus, { once: true });
-}
+  if (document.readyState === "complete") {
+    doFocus();
+  } else {
+    window.addEventListener("load", doFocus, { once: true });
+  }
 
-// Подстраховка: если юзер переключился на вкладку чуть позже
-if (!document.hasFocus()) {
-  window.addEventListener("focus", doFocus, { once: true });
-}
+  if (!document.hasFocus()) {
+    window.addEventListener("focus", doFocus, { once: true });
+  }
 }
 
 function renderLinksSettingsGrid() {
@@ -1057,6 +1306,10 @@ async function initApp() {
   applyClockSettings();
   initClockDragAndResize();
   startClockTimer();
+
+  applyWeatherSettings();
+  initWeatherDragAndResize();
+
   renderLinksSettingsGrid();
   initProfileUI();
   fetchWeather();
@@ -1200,6 +1453,7 @@ if (bgImgBlurRange) {
   });
 }
 
+// События часов
 const clockToggle = document.getElementById("clock-toggle");
 if (clockToggle) {
   clockToggle.addEventListener("change", (e) => {
@@ -1241,6 +1495,41 @@ if (clockStyleSelect) {
     currentConfig.clock.style = e.target.value;
     saveConfig();
     applyClockSettings();
+  });
+}
+
+// События погоды
+const weatherToggle = document.getElementById("weather-toggle");
+if (weatherToggle) {
+  weatherToggle.addEventListener("change", (e) => {
+    if (!currentConfig.weather) currentConfig.weather = { ...defaultConfig.weather };
+    currentConfig.weather.enabled = e.target.checked;
+    saveConfig();
+    applyWeatherSettings();
+  });
+}
+
+const weatherColorPicker = document.getElementById("weather-color-picker");
+if (weatherColorPicker) {
+  weatherColorPicker.addEventListener("input", (e) => {
+    const weatherEl = document.getElementById("weather-widget");
+    if (weatherEl) weatherEl.style.setProperty("--weather-color", e.target.value);
+  });
+
+  weatherColorPicker.addEventListener("change", (e) => {
+    if (!currentConfig.weather) currentConfig.weather = { ...defaultConfig.weather };
+    currentConfig.weather.color = e.target.value;
+    saveConfig();
+  });
+}
+
+const weatherStyleSelect = document.getElementById("weather-style-select");
+if (weatherStyleSelect) {
+  weatherStyleSelect.addEventListener("change", (e) => {
+    if (!currentConfig.weather) currentConfig.weather = { ...defaultConfig.weather };
+    currentConfig.weather.style = e.target.value;
+    saveConfig();
+    applyWeatherSettings();
   });
 }
 
@@ -1358,15 +1647,13 @@ if (profileModal) {
     closeProfileModal();
   });
 }
-// Перехват ввода: если начинаешь печатать, фокус сразу летит в поисковую строку
+
+// Перехват ввода для поисковой строки
 window.addEventListener("keydown", (e) => {
   const activeEl = document.activeElement;
   
-  // Если фокус уже в инпуте или нажаты системные клавиши (Ctrl, Alt, Cmd, Tab, Esc)
   if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA")) return;
   if (e.ctrlKey || e.altKey || e.metaKey || e.key === "Tab" || e.key === "Escape") return;
-  
-  // Игнорируем служебные клавиши F1-F12, CapsLock и т.д.
   if (e.key.length > 1) return;
 
   const searchInput = document.querySelector(".hero-search__input");
