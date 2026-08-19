@@ -56,6 +56,9 @@
         <button class="dock-btn" id="dock-account" title="Profile" data-i18n-title="dockProfile">
             <i class="fa-solid fa-user-gear"></i>
         </button>
+        <button class="dock-btn" id="dock-translator" title="Translator" data-i18n-title="dockTranslator">
+            <i class="fa-solid fa-language"></i>
+        </button>
     </aside>
 
     <!-- Модальное окно Настроек -->
@@ -396,6 +399,76 @@
                         <span data-i18n="importJsonBtn">Import JSON</span>
                     </label>
                 </div>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- Модальное окно Переводчика -->
+    <dialog id="translator-modal" class="modal">
+        <div class="modal-header">
+            <h2 data-i18n="translatorModalTitle">Translator</h2>
+            <button id="close-translator" class="close-btn" title="Close" data-i18n-title="closeBtn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="modal-body translator-modal-body">
+            <div class="translator-lang-bar">
+                <div class="select-wrapper trans-select-wrapper">
+                    <select id="trans-from-lang" class="custom-select" aria-label="From Language">
+                        <option value="auto" data-i18n="langAuto">Auto Detect</option>
+                        <option value="ru">Русский</option>
+                        <option value="en" selected>English</option>
+                        <option value="uk">Українська</option>
+                        <option value="kk">Қазақша</option>
+                        <option value="zh">中文</option>
+                        <option value="ja">日本語</option>
+                        <option value="ko">한국어</option>
+                        <option value="de">Deutsch</option>
+                        <option value="fr">Français</option>
+                        <option value="es">Español</option>
+                        <option value="it">Italiano</option>
+                        <option value="tr">Türkçe</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down select-icon"></i>
+                </div>
+
+                <button type="button" id="trans-swap-btn" class="btn btn-secondary btn-swap" title="Swap languages">
+                    <i class="fa-solid fa-right-left"></i>
+                </button>
+
+                <div class="select-wrapper trans-select-wrapper">
+                    <select id="trans-to-lang" class="custom-select" aria-label="To Language">
+                        <option value="ru" selected>Русский</option>
+                        <option value="en">English</option>
+                        <option value="uk">Українська</option>
+                        <option value="kk">Қазақша</option>
+                        <option value="zh">中文</option>
+                        <option value="ja">日本語</option>
+                        <option value="ko">한국어</option>
+                        <option value="de">Deutsch</option>
+                        <option value="fr">Français</option>
+                        <option value="es">Español</option>
+                        <option value="it">Italiano</option>
+                        <option value="tr">Türkçe</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down select-icon"></i>
+                </div>
+            </div>
+
+            <div class="translator-boxes">
+                <div class="trans-box">
+                    <textarea id="trans-input-text" class="custom-input custom-textarea" placeholder="Type text here..." data-i18n-placeholder="transInputPlaceholder"></textarea>
+                </div>
+                <div class="trans-box">
+                    <textarea id="trans-output-text" class="custom-input custom-textarea" readonly placeholder="Translation..." data-i18n-placeholder="transOutputPlaceholder"></textarea>
+                </div>
+            </div>
+
+            <div class="translator-actions">
+                <button type="button" id="trans-submit-btn" class="btn btn-primary btn-full">
+                    <i class="fa-solid fa-language"></i>
+                    <span data-i18n="transTranslateBtn">Translate</span>
+                </button>
             </div>
         </div>
     </dialog>

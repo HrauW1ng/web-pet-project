@@ -507,9 +507,10 @@ body {
   transform: translateX(-1px) scale(0.96);
 }
 
-/* --- 5. Модальные окна (#settings-modal и #profile-modal) --- */
+/* --- 5. Модальные окна (#settings-modal, #profile-modal и #translator-modal) --- */
 #settings-modal,
-#profile-modal {
+#profile-modal,
+#translator-modal {
   display: none;
   width: 90%;
   max-width: 38rem;
@@ -530,18 +531,21 @@ body {
 }
 
 #settings-modal[open],
-#profile-modal[open] {
+#profile-modal[open],
+#translator-modal[open] {
   display: flex;
   flex-direction: column;
 }
 
 #settings-modal:not([open]),
-#profile-modal:not([open]) {
+#profile-modal:not([open]),
+#translator-modal:not([open]) {
   display: none !important;
 }
 
 #settings-modal::backdrop,
-#profile-modal::backdrop {
+#profile-modal::backdrop,
+#translator-modal::backdrop {
   background: rgba(15, 16, 20, 0.6);
   backdrop-filter: blur(calc(var(--backdrop-blur) * 0.4));
   -webkit-backdrop-filter: blur(calc(var(--backdrop-blur) * 0.4));
@@ -794,6 +798,70 @@ body {
   flex: 1;
   justify-content: center;
   box-sizing: border-box;
+}
+
+/* --- Стили Переводчика (#translator-modal) --- */
+.translator-modal-body {
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.translator-lang-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.trans-select-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+.trans-select-wrapper .custom-select {
+  width: 100%;
+}
+
+.btn-swap {
+  flex-shrink: 0;
+  padding: 0.5rem 0.6rem;
+}
+
+.btn-swap i {
+  transition: transform 0.2s ease;
+}
+
+.btn-swap:active i {
+  transform: rotate(180deg);
+}
+
+.translator-boxes {
+  display: flex;
+  gap: 0.85rem;
+}
+
+.trans-box {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+
+.custom-textarea {
+  width: 100%;
+  min-height: 9rem;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+#trans-output-text.custom-textarea {
+  background: rgba(0, 0, 0, 0.18);
+  cursor: default;
+}
+
+.translator-actions {
+  flex-shrink: 0;
 }
 
 .text-center {
@@ -1583,7 +1651,8 @@ body.weather-edit-mode #dockbar {
 [data-ui-style="soft-matte"] .clock-edit-bar,
 [data-ui-style="soft-matte"] .weather-edit-bar,
 [data-ui-style="soft-matte"] #settings-modal,
-[data-ui-style="soft-matte"] #profile-modal {
+[data-ui-style="soft-matte"] #profile-modal,
+[data-ui-style="soft-matte"] #translator-modal {
   border: 1.5px solid var(--panel-border-hover);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
 }
@@ -1626,7 +1695,8 @@ body.weather-edit-mode #dockbar {
 [data-ui-style="minimal"] .clock-edit-bar,
 [data-ui-style="minimal"] .weather-edit-bar,
 [data-ui-style="minimal"] #settings-modal,
-[data-ui-style="minimal"] #profile-modal {
+[data-ui-style="minimal"] #profile-modal,
+[data-ui-style="minimal"] #translator-modal {
   box-shadow: none;
   border: 1px solid var(--panel-border);
   backdrop-filter: none !important;
@@ -1674,7 +1744,8 @@ body.weather-edit-mode #dockbar {
   }
 
   #settings-modal,
-  #profile-modal {
+  #profile-modal,
+  #translator-modal {
     padding: 1rem;
     max-height: 92vh;
   }
@@ -1683,6 +1754,18 @@ body.weather-edit-mode #dockbar {
     flex-direction: column;
     gap: 0.85rem;
     overflow-y: auto;
+  }
+
+  .translator-lang-bar {
+    flex-wrap: wrap;
+  }
+
+  .translator-boxes {
+    flex-direction: column;
+  }
+
+  .custom-textarea {
+    min-height: 7rem;
   }
 
   .settings-sidebar {
@@ -1707,22 +1790,26 @@ body.weather-edit-mode #dockbar {
 }
 
 #settings-modal[open],
-#profile-modal[open] {
+#profile-modal[open],
+#translator-modal[open] {
   animation: modal-show 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 #settings-modal.is-closing,
-#profile-modal.is-closing {
+#profile-modal.is-closing,
+#translator-modal.is-closing {
   animation: modal-hide 0.18s cubic-bezier(0.7, 0, 0.84, 0) forwards;
 }
 
 #settings-modal[open]::backdrop,
-#profile-modal[open]::backdrop {
+#profile-modal[open]::backdrop,
+#translator-modal[open]::backdrop {
   animation: backdrop-show 0.2s ease forwards;
 }
 
 #settings-modal.is-closing::backdrop,
-#profile-modal.is-closing::backdrop {
+#profile-modal.is-closing::backdrop,
+#translator-modal.is-closing::backdrop {
   animation: backdrop-hide 0.18s ease forwards;
 }
 

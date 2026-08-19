@@ -41,6 +41,10 @@ const defaultConfig = {
     lat: 50.45,
     lon: 30.52,
   },
+  translator: {
+    from: "en",
+    to: "ru",
+  },
   search: {
     placeholder: "Search the web…",
     urlTemplate: "https://www.google.com/search?q={query}",
@@ -54,6 +58,14 @@ const TRANSLATIONS = {
     closeBtn: "Close",
     dockSettings: "Settings",
     dockProfile: "Local Profile",
+    dockTranslator: "Translator",
+    translatorModalTitle: "Translator",
+    transInputPlaceholder: "Type text here...",
+    transOutputPlaceholder: "Translation...",
+    transTranslateBtn: "Translate",
+    transLoading: "Translating...",
+    transError: "Translation failed",
+    langAuto: "Auto Detect",
     tabCustomization: "Customization",
     tabWidgets: "Widgets",
     tabGeneral: "General",
@@ -148,6 +160,14 @@ const TRANSLATIONS = {
     closeBtn: "Закрыть",
     dockSettings: "Настройки",
     dockProfile: "Локальный профиль",
+    dockTranslator: "Переводчик",
+    translatorModalTitle: "Переводчик",
+    transInputPlaceholder: "Введите текст для перевода...",
+    transOutputPlaceholder: "Перевод...",
+    transTranslateBtn: "Перевести",
+    transLoading: "Перевод...",
+    transError: "Ошибка перевода",
+    langAuto: "Автоопределение",
     tabCustomization: "Кастомизация",
     tabWidgets: "Виджеты",
     tabGeneral: "Общие",
@@ -1047,6 +1067,123 @@ function initProfileUI() {
   }
 }
 
+// --- Переводчик ---
+let transDebounceTimer = null;
+
+function initTranslatorUI() {
+  if (!currentConfig.translator) {
+    currentConfig.translator = { ...defaultConfig.translator };
+  }
+
+  const fromSelect = document.getElementById("trans-from-lang");
+  const toSelect = document.getElementById("trans-to-lang");
+  const swapBtn = document.getElementById("trans-swap-btn");
+  const inputArea = document.getElementById("trans-input-text");
+  const outputArea = document.getElementById("trans-output-text");
+  const submitBtn = document.getElementById("trans-submit-btn");
+
+  if (fromSelect) {
+    fromSelect.value = currentConfig.translator.from || "en";
+    fromSelect.addEventListener("change", (e) => {
+      currentConfig.translator.from = e.target.value;
+      saveConfig();
+      performTranslation();
+    });
+  }
+
+  if (toSelect) {
+    toSelect.value = currentConfig.translator.to || "ru";
+    toSelect.addEventListener("change", (e) => {
+      currentConfig.translator.to = e.target.value;
+      saveConfig();
+      performTranslation();
+    });
+  }
+
+  if (swapBtn && fromSelect && toSelect) {
+    swapBtn.addEventListener("click", () => {
+      const currFrom = fromSelect.value;
+      const currTo = toSelect.value;
+
+      if (currFrom === "auto") {
+        fromSelect.value = currTo;
+        toSelect.value = "en";
+      } else {
+        fromSelect.value = currTo;
+        toSelect.value = currFrom;
+      }
+
+      currentConfig.translator.from = fromSelect.value;
+      currentConfig.translator.to = toSelect.value;
+      saveConfig();
+
+      const dict = TRANSLATIONS[currentConfig.lang] || TRANSLATIONS.en;
+      if (
+        outputArea &&
+        inputArea &&
+        outputArea.value &&
+        outputArea.value !== dict.transLoading &&
+        outputArea.value !== dict.transError
+      ) {
+        const temp = inputArea.value;
+        inputArea.value = outputArea.value;
+        outputArea.value = temp;
+      }
+
+      performTranslation();
+    });
+  }
+
+  if (inputArea) {
+    inputArea.addEventListener("input", () => {
+      clearTimeout(transDebounceTimer);
+      transDebounceTimer = setTimeout(performTranslation, 500);
+    });
+  }
+
+  if (submitBtn) {
+    submitBtn.addEventListener("click", performTranslation);
+  }
+}
+
+async function performTranslation() {
+  const inputArea = document.getElementById("trans-input-text");
+  const outputArea = document.getElementById("trans-output-text");
+  const fromSelect = document.getElementById("trans-from-lang");
+  const toSelect = document.getElementById("trans-to-lang");
+
+  if (!inputArea || !outputArea || !fromSelect || !toSelect) return;
+
+  const text = inputArea.value.trim();
+  const dict = TRANSLATIONS[currentConfig.lang] || TRANSLATIONS.en;
+
+  if (!text) {
+    outputArea.value = "";
+    return;
+  }
+
+  outputArea.value = dict.transLoading || "Translating...";
+
+  try {
+    const sl = fromSelect.value === "auto" ? "auto" : fromSelect.value;
+    const tl = toSelect.value;
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sl}&tl=${tl}&dt=t&q=${encodeURIComponent(text)}`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data && data[0]) {
+      const translated = data[0].map((item) => item[0]).join("");
+      outputArea.value = translated;
+    } else {
+      outputArea.value = dict.transError;
+    }
+  } catch (err) {
+    console.error("Translation error:", err);
+    outputArea.value = dict.transError;
+  }
+}
+
 // --- Язык ---
 function updateLanguage(lang) {
   currentConfig.lang = lang;
@@ -1231,8 +1368,10 @@ function closeTileEditForm() {
 const dockbar = document.getElementById("dockbar");
 const settingsModal = document.getElementById("settings-modal");
 const profileModal = document.getElementById("profile-modal");
+const translatorModal = document.getElementById("translator-modal");
 const closeSettingsBtn = document.getElementById("close-settings");
 const closeProfileBtn = document.getElementById("close-profile");
+const closeTranslatorBtn = document.getElementById("close-translator");
 
 function closeSettingsModal() {
   if (!settingsModal || !settingsModal.open || settingsModal.classList.contains("is-closing")) return;
@@ -1287,6 +1426,32 @@ function closeProfileModal() {
   setTimeout(finishClose, 220);
 }
 
+function closeTranslatorModal() {
+  if (!translatorModal || !translatorModal.open || translatorModal.classList.contains("is-closing")) return;
+
+  translatorModal.classList.add("is-closing");
+
+  let isDone = false;
+  const finishClose = () => {
+    if (isDone) return;
+    isDone = true;
+    translatorModal.removeEventListener("animationend", handleAnimationEnd);
+    translatorModal.classList.remove("is-closing");
+    if (translatorModal.open) {
+      translatorModal.close();
+    }
+  };
+
+  const handleAnimationEnd = (e) => {
+    if (e.target === translatorModal) {
+      finishClose();
+    }
+  };
+
+  translatorModal.addEventListener("animationend", handleAnimationEnd);
+  setTimeout(finishClose, 220);
+}
+
 // --- Инициализация ---
 async function initApp() {
   currentConfig = loadConfig();
@@ -1312,6 +1477,7 @@ async function initApp() {
 
   renderLinksSettingsGrid();
   initProfileUI();
+  initTranslatorUI();
   fetchWeather();
 }
 
@@ -1600,6 +1766,10 @@ if (dockbar) {
       settingsModal.showModal();
     } else if (btn.id === "dock-account" && profileModal) {
       profileModal.showModal();
+    } else if (btn.id === "dock-translator" && translatorModal) {
+      translatorModal.showModal();
+      const inputArea = document.getElementById("trans-input-text");
+      if (inputArea) setTimeout(() => inputArea.focus(), 100);
     }
   });
 }
@@ -1645,6 +1815,17 @@ if (profileModal) {
   profileModal.addEventListener("cancel", (e) => {
     e.preventDefault();
     closeProfileModal();
+  });
+}
+
+if (translatorModal) {
+  if (closeTranslatorBtn) {
+    closeTranslatorBtn.addEventListener("click", closeTranslatorModal);
+  }
+
+  translatorModal.addEventListener("cancel", (e) => {
+    e.preventDefault();
+    closeTranslatorModal();
   });
 }
 
